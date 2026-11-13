@@ -1,0 +1,28 @@
+{
+  "model_name": "resnet18",
+  "precision": "onnx",
+  "accuracy": 0.16,
+  "mean_latency_ms": 36.7843,
+  "std_latency_ms": 9.7507,
+  "throughput_rps": 1359.27,
+  "energy_wh": 0.001131,
+  "peak_memory_mb": 600.13,
+  "co2_kg": 8.1e-07,
+  "num_samples": 100,
+  "num_repeats": 1,
+  "batch_size": 64,
+  "hardware_info": {
+    "platform": "Windows-10-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count_physical": 8,
+    "cpu_count_logical": 12,
+    "ram_total_gb": 15.7,
+    "python_version": "3.11.9",
+    "torch_version": "2.10.0+cpu",
+    "cuda_available": false
+  },
+  "timestamp": "2026-11-13T07:24:56.609451+00:00",
+  "codecarbon_available": true,
+  "onnxruntime_available": true,
+  "device": "cpu"
+}

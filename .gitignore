@@ -44,5 +44,10 @@ coverage/
 *.sqlite
 *.sqlite3
 
+# Models & binaries
+*.onnx
+*.onnx.data
+*.tar.gz
+
 # OS
 Thumbs.db
