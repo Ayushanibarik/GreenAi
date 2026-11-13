@@ -63,3 +63,4 @@ class TestDay5DashboardBuild:
         # 4. Carbon intensity
         res_ci = client.get("/api/carbon/intensity")
         assert res_ci.status_code == 200
+
