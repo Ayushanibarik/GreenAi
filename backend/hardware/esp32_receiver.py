@@ -32,6 +32,8 @@ class HardwareMetricsSummary:
     avg_power_w: float
     total_energy_wh: float
     last_updated: str
+    total_readings: int = 0
+    mean_power_w: float = 0.0
 
 
 class ESP32DataReceiver:
@@ -124,6 +126,8 @@ class ESP32DataReceiver:
                 avg_power_w=0.0,
                 total_energy_wh=0.0,
                 last_updated=datetime.now(timezone.utc).isoformat(),
+                total_readings=0,
+                mean_power_w=0.0,
             )
 
         latest = self.buffer[-1]
@@ -139,6 +143,8 @@ class ESP32DataReceiver:
             avg_power_w=round(avg_power, 3),
             total_energy_wh=round(self.total_energy_wh, 4),
             last_updated=latest["timestamp"],
+            total_readings=len(self.buffer),
+            mean_power_w=round(avg_power, 3),
         )
 
     def clear(self) -> None:
