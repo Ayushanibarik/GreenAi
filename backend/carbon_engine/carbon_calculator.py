@@ -65,6 +65,7 @@ class CarbonIntelligence:
         energy_wh: float,
         region: str = "india",
         timestamp: Optional[datetime] = None,
+        apply_tod: bool = True,
         in_grams: bool = True,
     ) -> float:
         """Calculate carbon footprint from energy in Watt-hours.
@@ -72,7 +73,9 @@ class CarbonIntelligence:
         Formula: CO2e (kg) = (Energy Wh / 1000) * CI (kg CO2e / kWh)
         Returns CO2e in grams if in_grams=True, otherwise kg.
         """
-        ci = self.get_carbon_intensity(region=region, timestamp=timestamp)
+        ci = self.get_carbon_intensity(
+            region=region, timestamp=timestamp, apply_tod=apply_tod
+        )
         energy_kwh = energy_wh / 1000.0
         co2e_kg = energy_kwh * ci
 
