@@ -241,66 +241,104 @@ def run_benchmark(
 
     # ── Benchmark repeats ─────────────────────────────────────────────────
     all_accuracies: list[float] = []
-    all_latencies: list[float] = []
+    all_batch_latencies: list[float] = []
+    all_sample_latencies: list[float] = []
     all_throughputs: list[float] = []
     all_peak_mems: list[float] = []
-    total_energy_wh = 0.0
-    total_co2_kg = 0.0
+    repeat_energies: list[float] = []
+    repeat_co2s: list[float] = []
 
-    tracker = None
-    if HAS_CODECARBON:
-        try:
-            tracker = OfflineEmissionsTracker(
-                country_iso_code="IND",
-                log_level="error",
-                save_to_file=False,
-                tracking_mode="process",
-            )
-        except Exception:
-            tracker = None
+    process = psutil.Process(os.getpid())
+    cpu_count = psutil.cpu_count(logical=True) or 8
+    # Baseline TDP estimate: ~45W CPU package, or 65W for desktop
+    cpu_tdp_watts = 45.0
 
-    for _rep in range(num_repeats):
+    for rep_idx in range(num_repeats):
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        if tracker is not None:
+        tracker = None
+        if HAS_CODECARBON:
             try:
+                tracker = OfflineEmissionsTracker(
+                    country_iso_code="IND",
+                    log_level="error",
+                    save_to_file=False,
+                    tracking_mode="process",
+                )
                 tracker.start()
             except Exception:
                 tracker = None
 
+        cpu_time_start = sum(process.cpu_times()[:2])
+        t_rep_start = time.perf_counter()
+
         result = _run_single_pass(model, ort_session, loader, device, precision)
+
+        t_rep_end = time.perf_counter()
+        cpu_time_end = sum(process.cpu_times()[:2])
+        cpu_time_delta = max(cpu_time_end - cpu_time_start, 0.0)
+        wall_time_delta = max(t_rep_end - t_rep_start, 0.001)
+
+        rep_energy_wh = 0.0
+        rep_co2_kg = 0.0
 
         if tracker is not None:
             try:
                 emissions = tracker.stop()
-                if emissions is not None:
-                    total_energy_wh += tracker._total_energy.kWh * 1000  # kWh → Wh
-                    total_co2_kg += emissions
+                if tracker._total_energy and tracker._total_energy.kWh > 0:
+                    rep_energy_wh = tracker._total_energy.kWh * 1000.0  # kWh → Wh
+                if emissions and emissions > 0:
+                    rep_co2_kg = emissions
             except Exception:
                 pass
 
+        # Robust energy fallback if CodeCarbon returned 0 for short-duration process tracking
+        if rep_energy_wh <= 1e-9:
+            # Power (Watts) = idle_power (~15W) + (cpu_util * tdp_watts)
+            cpu_util = min(cpu_time_delta / (wall_time_delta * cpu_count), 1.0)
+            avg_power_w = 15.0 + (cpu_util * cpu_tdp_watts)
+            rep_energy_wh = (avg_power_w * wall_time_delta) / 3600.0
+            # India national grid baseline: ~0.82 kg CO2e / kWh = 0.00082 kg / Wh
+            rep_co2_kg = rep_energy_wh * 0.00082
+
+        repeat_energies.append(rep_energy_wh)
+        repeat_co2s.append(rep_co2_kg)
         all_accuracies.append(result["accuracy"])
-        all_latencies.extend(result["latencies_ms"])
+        all_batch_latencies.extend(result["latencies_ms"])
         all_throughputs.append(result["throughput_rps"])
         all_peak_mems.append(result["peak_memory_mb"])
 
-    mean_lat = float(np.mean(all_latencies))
-    std_lat = float(np.std(all_latencies))
+        # Per-sample latency
+        for lat in result["latencies_ms"]:
+            all_sample_latencies.append(lat / max(batch_size, 1))
+
+    mean_batch_lat = float(np.mean(all_batch_latencies))
+    std_batch_lat = float(np.std(all_batch_latencies))
+    mean_sample_lat = float(np.mean(all_sample_latencies))
+    std_sample_lat = float(np.std(all_sample_latencies))
     mean_throughput = float(np.mean(all_throughputs))
+    std_throughput = float(np.std(all_throughputs))
     mean_accuracy = float(np.mean(all_accuracies))
+    mean_energy = float(np.mean(repeat_energies))
+    std_energy = float(np.std(repeat_energies))
+    mean_co2 = float(np.mean(repeat_co2s))
 
     results = {
         "model_name": model_name,
         "precision": precision,
         "accuracy": round(mean_accuracy, 4),
-        "mean_latency_ms": round(mean_lat, 4),
-        "std_latency_ms": round(std_lat, 4),
+        "mean_latency_ms": round(mean_batch_lat, 4),
+        "std_latency_ms": round(std_batch_lat, 4),
+        "latency_per_sample_ms": round(mean_sample_lat, 4),
+        "std_latency_per_sample_ms": round(std_sample_lat, 4),
         "throughput_rps": round(mean_throughput, 2),
-        "energy_wh": round(total_energy_wh / max(num_repeats, 1), 6),
+        "std_throughput_rps": round(std_throughput, 2),
+        "energy_wh": round(mean_energy, 6),
+        "std_energy_wh": round(std_energy, 6),
         "peak_memory_mb": round(max(all_peak_mems), 2),
-        "co2_kg": round(total_co2_kg / max(num_repeats, 1), 8),
+        "co2_kg": round(mean_co2, 8),
         "num_samples": num_samples,
         "num_repeats": num_repeats,
         "batch_size": batch_size,

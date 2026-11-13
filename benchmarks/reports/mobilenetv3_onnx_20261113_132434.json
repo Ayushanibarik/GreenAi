@@ -1,0 +1,32 @@
+{
+  "model_name": "mobilenetv3",
+  "precision": "onnx",
+  "accuracy": 0.115,
+  "mean_latency_ms": 9.3692,
+  "std_latency_ms": 10.6634,
+  "latency_per_sample_ms": 0.1464,
+  "std_latency_per_sample_ms": 0.1666,
+  "throughput_rps": 6251.46,
+  "std_throughput_rps": 2391.43,
+  "energy_wh": 0.001144,
+  "std_energy_wh": 0.000239,
+  "peak_memory_mb": 381.13,
+  "co2_kg": 8.2e-07,
+  "num_samples": 200,
+  "num_repeats": 2,
+  "batch_size": 64,
+  "hardware_info": {
+    "platform": "Windows-10-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count_physical": 8,
+    "cpu_count_logical": 12,
+    "ram_total_gb": 15.7,
+    "python_version": "3.11.9",
+    "torch_version": "2.10.0+cpu",
+    "cuda_available": false
+  },
+  "timestamp": "2026-11-13T07:54:34.691685+00:00",
+  "codecarbon_available": true,
+  "onnxruntime_available": true,
+  "device": "cpu"
+}

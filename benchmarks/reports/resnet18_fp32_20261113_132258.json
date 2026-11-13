@@ -1,0 +1,32 @@
+{
+  "model_name": "resnet18",
+  "precision": "fp32",
+  "accuracy": 0.09,
+  "mean_latency_ms": 128.5272,
+  "std_latency_ms": 128.4516,
+  "latency_per_sample_ms": 2.0082,
+  "std_latency_per_sample_ms": 2.0071,
+  "throughput_rps": 539.84,
+  "std_throughput_rps": 285.33,
+  "energy_wh": 0.005812,
+  "std_energy_wh": 0.002432,
+  "peak_memory_mb": 456.47,
+  "co2_kg": 4.15e-06,
+  "num_samples": 200,
+  "num_repeats": 2,
+  "batch_size": 64,
+  "hardware_info": {
+    "platform": "Windows-10-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count_physical": 8,
+    "cpu_count_logical": 12,
+    "ram_total_gb": 15.7,
+    "python_version": "3.11.9",
+    "torch_version": "2.10.0+cpu",
+    "cuda_available": false
+  },
+  "timestamp": "2026-11-13T07:52:58.789330+00:00",
+  "codecarbon_available": true,
+  "onnxruntime_available": true,
+  "device": "cpu"
+}
