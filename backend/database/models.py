@@ -12,9 +12,9 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    Uuid,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -25,7 +25,7 @@ class Base(DeclarativeBase):
 class Workload(Base):
     __tablename__ = "workloads"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(256), nullable=False)
     model_type = Column(String(128), nullable=False)
     framework = Column(String(64), nullable=False, default="pytorch")
@@ -36,8 +36,8 @@ class Workload(Base):
 class BenchmarkResult(Base):
     __tablename__ = "benchmark_results"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    workload_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workload_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
     config_name = Column(String(64), nullable=False)
     accuracy = Column(Float, nullable=True)
     latency_ms = Column(Float, nullable=False)
@@ -52,8 +52,8 @@ class BenchmarkResult(Base):
 class EnergyReading(Base):
     __tablename__ = "energy_readings"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    workload_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workload_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
     cpu_percent = Column(Float, nullable=False)
     gpu_percent = Column(Float, nullable=True)
     ram_mb = Column(Float, nullable=False)
@@ -67,8 +67,8 @@ class EnergyReading(Base):
 class CarbonEstimate(Base):
     __tablename__ = "carbon_estimates"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    workload_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workload_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
     energy_wh = Column(Float, nullable=False)
     carbon_intensity = Column(Float, nullable=False)
     co2e_grams = Column(Float, nullable=False)
@@ -79,7 +79,7 @@ class CarbonEstimate(Base):
 class HardwareReading(Base):
     __tablename__ = "hardware_readings"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     voltage = Column(Float, nullable=False)
     current = Column(Float, nullable=False)
     power = Column(Float, nullable=False)
@@ -91,8 +91,8 @@ class HardwareReading(Base):
 class OptimizationResult(Base):
     __tablename__ = "optimization_results"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    workload_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workload_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
     original_config = Column(String(64), nullable=False)
     optimized_config = Column(String(64), nullable=False)
     energy_saved_pct = Column(Float, nullable=False)

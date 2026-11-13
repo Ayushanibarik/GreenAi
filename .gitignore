@@ -39,5 +39,10 @@ htmlcov/
 .pytest_cache/
 coverage/
 
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
 # OS
 Thumbs.db

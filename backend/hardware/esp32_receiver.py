@@ -10,10 +10,14 @@ from typing import Any, Deque, Dict, List, Optional
 
 @dataclass
 class ESP32Payload:
-    voltage: float  # Volts (V)
-    current: float  # Milliamps (mA) or Amps (A)
-    power: float    # Watts (W)
-    energy: float   # Accumulated energy (Wh or Joules)
+    voltage: Optional[float] = None  # Volts (V)
+    current: Optional[float] = None  # Milliamps (mA) or Amps (A)
+    power: Optional[float] = None    # Watts (W)
+    energy: Optional[float] = None   # Accumulated energy (Wh or Joules)
+    voltage_v: Optional[float] = None
+    current_ma: Optional[float] = None
+    power_w: Optional[float] = None
+    energy_wh: Optional[float] = None
     timestamp: Optional[str] = None
     device_id: Optional[str] = "esp32_ina219_node1"
 
@@ -40,21 +44,39 @@ class ESP32DataReceiver:
 
     def ingest(self, payload: ESP32Payload) -> Dict[str, Any]:
         """Validate and record an incoming reading from ESP32 hardware."""
+        # Resolve fields from either standard or suffixed naming
+        voltage_val = payload.voltage if payload.voltage is not None else (
+            payload.voltage_v if payload.voltage_v is not None else 5.0
+        )
+        current_val = payload.current if payload.current is not None else (
+            payload.current_ma if payload.current_ma is not None else 0.0
+        )
+        power_val = payload.power if payload.power is not None else (
+            payload.power_w if payload.power_w is not None else 0.0
+        )
+        energy_val = payload.energy if payload.energy is not None else (
+            payload.energy_wh if payload.energy_wh is not None else 0.0
+        )
+
         # Normalize current to Amps if provided in mA (> 50 typically means mA for micro systems)
-        current_a = payload.current
-        if abs(payload.current) > 50.0:  # Value is in mA
-            current_a = payload.current / 1000.0
+        current_a = current_val
+        if abs(current_val) > 50.0:  # Value is in mA
+            current_a = current_val / 1000.0
 
         # Calculate power if missing or 0
-        calculated_power = payload.power
-        if calculated_power <= 0.0 and payload.voltage > 0:
-            calculated_power = payload.voltage * current_a
+        calculated_power = power_val
+        if calculated_power <= 0.0 and voltage_val > 0:
+            calculated_power = voltage_val * current_a
 
         record = {
-            "voltage": round(float(payload.voltage), 3),
+            "voltage": round(float(voltage_val), 3),
+            "voltage_v": round(float(voltage_val), 3),
             "current": round(float(current_a), 4),
+            "current_ma": round(float(current_val if abs(current_val) > 50.0 else current_val * 1000.0), 2),
             "power": round(float(calculated_power), 3),
-            "energy": round(float(payload.energy), 4),
+            "power_w": round(float(calculated_power), 3),
+            "energy": round(float(energy_val), 4),
+            "energy_wh": round(float(energy_val), 4),
             "timestamp": payload.timestamp or datetime.now(timezone.utc).isoformat(),
             "device_id": payload.device_id or "esp32_ina219_node1",
         }

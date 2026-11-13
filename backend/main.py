@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api.routes import api_router
 from backend.api.websocket import ws_router
 from backend.config import settings
+from backend.database.connection import init_db
 
 # Configure logging
 logging.basicConfig(
@@ -25,6 +26,7 @@ logger = logging.getLogger("greencompute")
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager for clean startup & shutdown."""
     logger.info("Initializing GreenCompute AI backend engine...")
+    await init_db()
     logger.info(f"Default Carbon Intensity: {settings.default_carbon_intensity} kg CO2e/kWh")
     logger.info("Hardware receiver & EnergyProfiler ready.")
     yield
@@ -56,6 +58,13 @@ app.add_middleware(
 # ── Include Routers ───────────────────────────────────────────────────────
 app.include_router(api_router, prefix="/api")
 app.include_router(ws_router)
+
+
+@app.get("/health", tags=["system"])
+async def root_health():
+    """Health check endpoint at root level."""
+    from backend.api.routes import health_check
+    return await health_check()
 
 
 @app.get("/", tags=["root"])
