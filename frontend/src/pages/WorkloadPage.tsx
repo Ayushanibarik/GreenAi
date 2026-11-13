@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import StatusBadge from '../components/StatusBadge';
-import { PlusCircle, Search, Filter, Layers, Zap, Clock, RefreshCw, X, Sparkles } from 'lucide-react';
+import { PlusCircle, Search, Filter, Layers, RefreshCw, X } from 'lucide-react';
 import type { Workload } from '../types';
 
 const mockWorkloads: Workload[] = [
   {
     id: 'WL-1001',
-    name: 'ResNet-50 ImageNet-1k Validation',
-    model_type: 'Computer Vision',
+    name: 'Product image review',
+    model_type: 'Image processing',
     status: 'completed',
     energy_wh: 14.8,
     carbon_g: 12.1,
@@ -17,8 +17,8 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1002',
-    name: 'BERT-Base Sentiment Embeddings',
-    model_type: 'NLP Inference',
+    name: 'Customer note review',
+    model_type: 'Text processing',
     status: 'completed',
     energy_wh: 22.4,
     carbon_g: 18.3,
@@ -28,8 +28,8 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1003',
-    name: 'Llama-3-8B QLoRA Instruct Finetune',
-    model_type: 'Generative AI',
+    name: 'Monthly content export',
+    model_type: 'Batch processing',
     status: 'running',
     energy_wh: 248.6,
     carbon_g: 203.8,
@@ -39,8 +39,8 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1004',
-    name: 'Whisper-Large-v3 Audio Benchmark',
-    model_type: 'Audio Speech',
+    name: 'Audio archive',
+    model_type: 'Audio processing',
     status: 'pending',
     energy_wh: 0,
     carbon_g: 0,
@@ -50,8 +50,8 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1005',
-    name: 'YOLOv8 Real-Time Video Object Detection',
-    model_type: 'Computer Vision',
+    name: 'Video catalogue',
+    model_type: 'Media processing',
     status: 'completed',
     energy_wh: 31.2,
     carbon_g: 25.5,
@@ -71,7 +71,7 @@ export const WorkloadPage: React.FC = () => {
   // Form State
   const [formData, setFormData] = useState({
     name: '',
-    model_type: 'Computer Vision',
+    model_type: 'Image processing',
     dataset: '',
     precision: 'INT8',
     min_accuracy: 90,
@@ -85,7 +85,7 @@ export const WorkloadPage: React.FC = () => {
     setTimeout(() => {
       const newWorkload: Workload = {
         id: `WL-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formData.name || 'Custom ML Workload',
+        name: formData.name || 'New run',
         model_type: formData.model_type,
         status: 'running',
         energy_wh: 18.5,
@@ -99,7 +99,7 @@ export const WorkloadPage: React.FC = () => {
       setShowModal(false);
       setFormData({
         name: '',
-        model_type: 'Computer Vision',
+        model_type: 'Image processing',
         dataset: '',
         precision: 'INT8',
         min_accuracy: 90,
@@ -126,23 +126,23 @@ export const WorkloadPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                Workload Orchestrator
+                Runs
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Workload Pipeline & Queue Management
+              Keep every run in view.
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-              Dispatch and monitor AI workloads with strict energy, carbon, and latency SLA guarantees.
+              Create a run, then follow its energy use and progress in one place.
             </p>
           </div>
 
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer self-start sm:self-auto"
+            className="button-primary inline-flex items-center gap-2 px-5 py-3 text-xs font-semibold cursor-pointer self-start sm:self-auto"
           >
             <PlusCircle className="h-4 w-4" />
-            <span>Submit New Workload</span>
+            <span>New run</span>
           </button>
         </div>
       </div>
@@ -153,7 +153,7 @@ export const WorkloadPage: React.FC = () => {
           <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search workloads by name, model, or ID..."
+            placeholder="Search by name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full rounded-xl glass-pill py-2.5 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 border border-white/[0.06] focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
@@ -182,14 +182,14 @@ export const WorkloadPage: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-white/[0.06] text-slate-400 bg-white/[0.02]">
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">ID</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Workload / Model</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Run</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Activity</th>
                 <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Emissions</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px] text-right">Submitted</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Impact</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Duration</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Quality</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px] text-right">Created</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -235,8 +235,8 @@ export const WorkloadPage: React.FC = () => {
                   <Layers className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">Submit Green Workload</h3>
-                  <p className="text-[11px] text-slate-400">Specify pipeline accuracy & latency thresholds</p>
+                  <h3 className="text-base font-bold text-white tracking-tight">Create a run</h3>
+                  <p className="text-[11px] text-slate-400">A few details are all you need.</p>
                 </div>
               </div>
               <button
@@ -249,11 +249,11 @@ export const WorkloadPage: React.FC = () => {
 
             <form onSubmit={handleCreate} className="mt-5 space-y-4 text-xs">
               <div>
-                <label className="block font-medium text-slate-300 mb-1.5">Workload Identifier / Name</label>
+                <label className="block font-medium text-slate-300 mb-1.5">Run name</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. VisionTransformer-ViT-B16 Eval"
+                  placeholder="e.g. Product image review"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none"
@@ -262,30 +262,30 @@ export const WorkloadPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-300 mb-1.5">Model Architecture</label>
+                  <label className="block font-medium text-slate-300 mb-1.5">Activity type</label>
                   <select
                     value={formData.model_type}
                     onChange={(e) => setFormData({ ...formData, model_type: e.target.value })}
                     className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none bg-slate-900"
                   >
-                    <option value="Computer Vision">Computer Vision (CNN / ViT)</option>
-                    <option value="NLP Inference">NLP Inference (BERT / RoBERTa)</option>
-                    <option value="Generative AI">Generative AI (Llama / Mistral)</option>
-                    <option value="Audio Speech">Audio Speech (Whisper)</option>
+                    <option value="Image processing">Image processing</option>
+                    <option value="Text processing">Text processing</option>
+                    <option value="Content generation">Content generation</option>
+                    <option value="Audio processing">Audio processing</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-300 mb-1.5">Target Quantization</label>
+                  <label className="block font-medium text-slate-300 mb-1.5">Run profile</label>
                   <select
                     value={formData.precision}
                     onChange={(e) => setFormData({ ...formData, precision: e.target.value })}
                     className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none bg-slate-900"
                   >
-                    <option value="INT8">INT8 (Max Energy Reduction)</option>
-                    <option value="ONNX">ONNX Runtime Graph Optimized</option>
-                    <option value="FP16">FP16 Half Precision</option>
-                    <option value="FP32">FP32 Full Precision Baseline</option>
+                    <option value="INT8">Efficient</option>
+                    <option value="ONNX">Balanced</option>
+                    <option value="FP16">Fast</option>
+                    <option value="FP32">Standard</option>
                   </select>
                 </div>
               </div>
@@ -293,7 +293,7 @@ export const WorkloadPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="font-medium text-slate-300">Min Accuracy SLA</label>
+                    <label className="font-medium text-slate-300">Quality target</label>
                     <span className="font-mono text-emerald-400 font-bold">{formData.min_accuracy}%</span>
                   </div>
                   <input
@@ -308,7 +308,7 @@ export const WorkloadPage: React.FC = () => {
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="font-medium text-slate-300">Max Latency SLA</label>
+                    <label className="font-medium text-slate-300">Time limit</label>
                     <span className="font-mono text-emerald-400 font-bold">{formData.max_latency} ms</span>
                   </div>
                   <input
@@ -323,9 +323,9 @@ export const WorkloadPage: React.FC = () => {
               </div>
 
               <div className="rounded-2xl glass-pill p-3.5 border border-emerald-500/30 text-[11px] text-emerald-300 flex items-start gap-2.5">
-                <Sparkles className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                <Layers className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>
-                  GreenCompute Orchestrator will benchmark candidate execution profiles and select the minimum energy-carbon configuration satisfying your SLA.
+                  We’ll use your preferences to choose a balanced way to run this task.
                 </span>
               </div>
 
@@ -340,10 +340,10 @@ export const WorkloadPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 font-bold text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+                  className="button-primary inline-flex items-center gap-2 px-5 py-2.5 font-semibold cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting && <RefreshCw className="h-3.5 w-3.5 animate-spin" />}
-                  Dispatch to Orchestrator
+                  Create run
                 </button>
               </div>
             </form>

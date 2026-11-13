@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Sun, Moon, Sparkles, Zap } from 'lucide-react';
+import { Calendar, Sun, Moon } from 'lucide-react';
 
 interface HourSlot {
   hour: number;
@@ -50,7 +50,7 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
     if (isSelected) {
       switch (status) {
         case 'optimal':
-          return 'bg-emerald-500 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.5)] border-emerald-300 scale-105';
+          return 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(10,132,255,0.5)] border-emerald-300 scale-105';
         case 'moderate':
           return 'bg-teal-500 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.5)] border-teal-300 scale-105';
         case 'peak':
@@ -77,17 +77,17 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-bold text-white tracking-tight">
-              24-Hour Carbon Dispatch Matrix
+              Hourly grid view
             </h3>
-            <p className="text-[11px] text-slate-400">Click any hour to preview grid renewable ratio</p>
+            <p className="text-[11px] text-slate-400">Select a time to inspect its estimate.</p>
           </div>
         </div>
 
         {/* Legend Chips */}
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
           <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-emerald-300 border border-emerald-500/30">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span>Optimal (Solar Peak)</span>
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(90,169,255,0.8)]" />
+            <span>Lower impact</span>
           </div>
           <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-slate-400 border border-white/[0.06]">
             <span className="h-2 w-2 rounded-full bg-slate-500" />
@@ -95,7 +95,7 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
           </div>
           <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-rose-300 border border-rose-500/30">
             <span className="h-2 w-2 rounded-full bg-rose-400" />
-            <span>Grid Peak (Avoid)</span>
+            <span>Higher impact</span>
           </div>
         </div>
       </div>
@@ -143,11 +143,11 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
                       : 'bg-white/10 text-slate-300 border border-white/10'
                   }`}
                 >
-                  {selectedSlot.status === 'optimal' ? 'Best Green Window' : selectedSlot.status}
+                  {selectedSlot.status === 'optimal' ? 'Lower impact' : selectedSlot.status}
                 </span>
               </div>
               <p className="text-slate-400 text-[11px] mt-0.5">
-                Marginal Grid Intensity:{' '}
+                Grid estimate:{' '}
                 <strong className="text-white font-mono">{selectedSlot.intensity.toFixed(2)} kg CO₂e / kWh</strong>
               </p>
             </div>
@@ -155,12 +155,12 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
 
           <div className="mt-3 sm:mt-0 flex items-center gap-4">
             <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Renewable Mix</span>
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Cleaner mix</span>
               <span className="font-mono text-emerald-400 font-bold text-base">{selectedSlot.renewablePct}%</span>
             </div>
             <div className="h-8 w-px bg-white/[0.08]" />
             <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Carbon Tariff</span>
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Relative impact</span>
               <span className="font-mono text-slate-200 font-semibold text-sm">
                 {selectedSlot.status === 'optimal' ? 'Lowest' : selectedSlot.status === 'peak' ? 'Peak +40%' : 'Standard'}
               </span>

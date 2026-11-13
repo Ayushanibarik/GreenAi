@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Sliders,
-  Sparkles,
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
@@ -34,7 +33,7 @@ interface CandidateConfig {
 const ALL_CANDIDATES: CandidateConfig[] = [
   {
     id: 'resnet18_fp32',
-    name: 'ResNet-18 FP32 (Unoptimized Baseline)',
+    name: 'Standard profile',
     architecture: 'ResNet-18',
     precision: 'FP32',
     accuracy: 93.2,
@@ -46,7 +45,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_fp16',
-    name: 'ResNet-18 FP16 AMP',
+    name: 'Fast profile',
     architecture: 'ResNet-18',
     precision: 'FP16',
     accuracy: 93.0,
@@ -58,7 +57,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_onnx',
-    name: 'ResNet-18 ONNX Runtime Graph Engine',
+    name: 'Balanced profile',
     architecture: 'ResNet-18',
     precision: 'ONNX',
     accuracy: 93.1,
@@ -70,7 +69,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_int8',
-    name: 'ResNet-18 INT8 Dynamic Quantization',
+    name: 'Efficient profile',
     architecture: 'ResNet-18',
     precision: 'INT8',
     accuracy: 92.4,
@@ -82,7 +81,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_fp32',
-    name: 'MobileNet-V3 Small FP32 Architecture Swap',
+    name: 'Compact profile',
     architecture: 'MobileNet-V3',
     precision: 'FP32',
     accuracy: 89.6,
@@ -94,7 +93,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_onnx',
-    name: 'MobileNet-V3 ONNX Runtime Engine',
+    name: 'Light profile',
     architecture: 'MobileNet-V3',
     precision: 'ONNX',
     accuracy: 89.4,
@@ -106,7 +105,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_int8',
-    name: 'MobileNet-V3 INT8 Ultra-Green Quantized',
+    name: 'Lowest-energy profile',
     architecture: 'MobileNet-V3',
     precision: 'INT8',
     accuracy: 88.9,
@@ -117,6 +116,13 @@ const ALL_CANDIDATES: CandidateConfig[] = [
     throughput: 795.0,
   },
 ];
+
+const getModeLabel = (precision: CandidateConfig['precision']) => ({
+  FP32: 'Standard',
+  FP16: 'Fast',
+  INT8: 'Efficient',
+  ONNX: 'Balanced',
+}[precision]);
 
 export const OptimizerPage: React.FC = () => {
   // Constraints state
@@ -154,7 +160,7 @@ export const OptimizerPage: React.FC = () => {
     setApplied(false);
   };
 
-  // Multi-Objective Pareto Evaluation
+  // Evaluate each available profile against the selected priorities.
   const evaluatedCandidates = useMemo(() => {
     return ALL_CANDIDATES.map((c) => {
       const meetsAcc = c.accuracy >= minAccuracy;
@@ -240,14 +246,13 @@ export const OptimizerPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-white">Constrained Model Pareto Optimizer</h2>
+            <h2 className="text-xl font-bold tracking-tight text-white">Configuration planner</h2>
             <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
-              Pareto Frontier
+              Balanced choices
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1 font-mono">
-            Formulation: <span className="text-emerald-400 font-semibold">min(E × CI)</span> subject to{' '}
-            <span className="text-slate-200">Accuracy ≥ A_min, Latency ≤ L_max, Memory ≤ Mem_avail</span>
+          <p className="text-xs text-slate-400 mt-1">
+            Choose what matters most: energy, time and output quality.
           </p>
         </div>
 
@@ -260,7 +265,7 @@ export const OptimizerPage: React.FC = () => {
             }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiSynced ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
-            {apiSynced ? 'Backend Engine Connected' : 'Local Optimizer Active'}
+            {apiSynced ? 'Connected' : 'Using local data'}
           </span>
         </div>
       </div>
@@ -274,14 +279,14 @@ export const OptimizerPage: React.FC = () => {
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                 <Sliders className="h-4 w-4" />
               </div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">SLA Constraints</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-white">Your priorities</h3>
             </div>
           </div>
 
           {/* SLA Preset Pills */}
           <div>
             <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-              Optimization Presets
+              Presets
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -289,21 +294,21 @@ export const OptimizerPage: React.FC = () => {
                 onClick={() => applyPreset('edge')}
                 className="rounded-xl glass-pill py-2 px-2.5 text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 transition-all text-center"
               >
-                ⚡ Edge ≤30ms
+                Fast
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset('balanced')}
                 className="rounded-xl glass-pill py-2 px-2.5 text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 transition-all text-center"
               >
-                ⚖️ Balanced
+                Balanced
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset('accurate')}
                 className="rounded-xl glass-pill py-2 px-2.5 text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 transition-all text-center"
               >
-                🎯 High Acc
+                High quality
               </button>
             </div>
           </div>
@@ -313,7 +318,7 @@ export const OptimizerPage: React.FC = () => {
             {/* Accuracy Slider */}
             <div>
               <div className="flex justify-between items-center text-slate-300 mb-1.5">
-                <span className="font-medium">Minimum Accuracy SLA (A_min)</span>
+                <span className="font-medium">Quality target</span>
                 <span className="font-mono text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30">
                   {minAccuracy.toFixed(1)}%
                 </span>
@@ -331,15 +336,15 @@ export const OptimizerPage: React.FC = () => {
                 className="w-full"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-                <span>85.0% (Permissive)</span>
-                <span>94.0% (Strict)</span>
+                <span>Flexible</span>
+                <span>Strict</span>
               </div>
             </div>
 
             {/* Latency Slider */}
             <div>
               <div className="flex justify-between items-center text-slate-300 mb-1.5">
-                <span className="font-medium">Maximum Latency Ceiling (L_max)</span>
+                <span className="font-medium">Time limit</span>
                 <span className="font-mono text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30">
                   {maxLatency} ms
                 </span>
@@ -357,15 +362,15 @@ export const OptimizerPage: React.FC = () => {
                 className="w-full"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-                <span>15 ms (Real-time Edge)</span>
-                <span>120 ms (Batch Inference)</span>
+                <span>15 ms</span>
+                <span>120 ms</span>
               </div>
             </div>
 
             {/* Memory Slider */}
             <div>
               <div className="flex justify-between items-center text-slate-300 mb-1.5">
-                <span className="font-medium">Memory / VRAM Ceiling</span>
+                <span className="font-medium">Memory limit</span>
                 <span className="font-mono text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30">
                   {maxMemory} MB
                 </span>
@@ -392,21 +397,21 @@ export const OptimizerPage: React.FC = () => {
           {/* Objective Multi-Factor Weights */}
           <div className="border-t border-white/[0.06] pt-4 space-y-2.5">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Objective Multi-Factor Weights
+              What matters most
             </h4>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between items-center text-slate-300">
-                <span>α - Energy Weight ({(alphaEnergy * 100).toFixed(0)}%)</span>
+                <span>Energy ({(alphaEnergy * 100).toFixed(0)}%)</span>
                 <span className="text-emerald-400 font-bold text-[11px] bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30">
                   Primary
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-400 text-[11px]">
-                <span>β - Latency Weight ({(betaLatency * 100).toFixed(0)}%)</span>
+                <span>Time ({(betaLatency * 100).toFixed(0)}%)</span>
                 <span className="text-slate-300 font-medium">Secondary</span>
               </div>
               <div className="flex justify-between items-center text-slate-400 text-[11px]">
-                <span>γ - Accuracy Penalty ({(gammaAccuracy * 100).toFixed(0)}%)</span>
+                <span>Quality ({(gammaAccuracy * 100).toFixed(0)}%)</span>
                 <span className="text-slate-300 font-medium">Guardrail</span>
               </div>
             </div>
@@ -415,10 +420,9 @@ export const OptimizerPage: React.FC = () => {
           <button
             onClick={handleRunOptimizer}
             disabled={isOptimizing}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-950/40 hover:from-emerald-500 hover:to-teal-500 transition-all disabled:opacity-50 active:scale-[0.99]"
+            className="button-primary inline-flex w-full items-center justify-center gap-2 py-3 text-xs font-semibold disabled:opacity-50"
           >
-            <Sparkles className="h-4 w-4" />
-            {isOptimizing ? 'Evaluating Pareto Frontier...' : 'Recompute ML Predictor'}
+            {isOptimizing ? 'Refreshing…' : 'Refresh recommendation'}
           </button>
         </div>
 
@@ -430,10 +434,10 @@ export const OptimizerPage: React.FC = () => {
             <div className="glass-card rounded-2xl p-5 border border-white/[0.08] shadow-lg relative">
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Unoptimized Baseline
+                  Standard setup
                 </span>
                 <span className="rounded-full glass-pill px-2.5 py-0.5 text-[10px] font-mono text-slate-300">
-                  Standard FP32
+                  Standard
                 </span>
               </div>
 
@@ -445,29 +449,29 @@ export const OptimizerPage: React.FC = () => {
                   <span className="text-lg font-bold text-rose-400 font-mono mt-0.5 block">{baseline.energy_wh} Wh</span>
                 </div>
                 <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Inference Latency</span>
+                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Run time</span>
                   <span className="text-lg font-bold text-rose-400 font-mono mt-0.5 block">{baseline.latency_ms} ms</span>
                 </div>
                 <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Top-1 Accuracy</span>
+                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Output quality</span>
                   <span className="text-lg font-bold text-slate-200 font-mono mt-0.5 block">{baseline.accuracy}%</span>
                 </div>
                 <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">CO₂e Emissions</span>
+                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Impact</span>
                   <span className="text-lg font-bold text-slate-400 font-mono mt-0.5 block">{baseline.co2_g} g</span>
                 </div>
               </div>
             </div>
 
             {/* Right Card: Recommended Green Config (Apple Highlight Card) */}
-            <div className="glass-card rounded-2xl p-5 border-2 border-emerald-500/60 bg-gradient-to-br from-emerald-950/40 via-slate-900/60 to-slate-950/80 shadow-[0_0_30px_rgba(16,185,129,0.2)] relative">
+            <div className="glass-card rounded-2xl p-5 border-2 border-emerald-500/60 bg-gradient-to-br from-emerald-950/40 via-slate-900/60 to-slate-950/80 shadow-[0_0_30px_rgba(10,132,255,0.22)] relative">
               <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3 mb-3">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  RECOMMENDED GREEN CONFIG
+                  Recommended setup
                 </span>
                 <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-mono text-emerald-300 border border-emerald-500/40 font-bold">
-                  {recommended.precision}
+                  {getModeLabel(recommended.precision)}
                 </span>
               </div>
 
@@ -481,19 +485,19 @@ export const OptimizerPage: React.FC = () => {
                   </span>
                 </div>
                 <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">Inference Latency</span>
+                  <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">Run time</span>
                   <span className="text-lg font-bold text-white font-mono mt-0.5 block">
                     {recommended.latency_ms} ms <span className="text-xs text-emerald-400 font-bold">(-{latencyReductionPct}%)</span>
                   </span>
                 </div>
                 <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Top-1 Accuracy</span>
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Output quality</span>
                   <span className="text-lg font-bold text-white font-mono mt-0.5 block">
                     {recommended.accuracy}% <span className="text-xs text-emerald-400">({accuracyDelta}%)</span>
                   </span>
                 </div>
                 <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">CO₂e Emissions</span>
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Impact</span>
                   <span className="text-lg font-bold text-emerald-400 font-mono mt-0.5 block">
                     {recommended.co2_g} g <span className="text-xs text-emerald-300">(-{co2AvoidedG}g)</span>
                   </span>
@@ -502,7 +506,7 @@ export const OptimizerPage: React.FC = () => {
 
               <div className="mt-4 flex items-center justify-between border-t border-emerald-500/30 pt-3">
                 <span className="text-[11px] text-emerald-300 font-medium">
-                  ✓ Meets SLA: {recommended.accuracy}% ≥ {minAccuracy}% & {recommended.latency_ms}ms ≤ {maxLatency}ms
+                  Fits your current priorities
                 </span>
                 <button
                   onClick={() => setApplied(true)}
@@ -516,7 +520,7 @@ export const OptimizerPage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      Apply Config
+                      Use this profile
                       <ArrowRight className="h-3.5 w-3.5" />
                     </>
                   )}
@@ -528,9 +532,9 @@ export const OptimizerPage: React.FC = () => {
           {/* Architecture & Quantization Matrix Table */}
           <div className="glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg">
             <div className="mb-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-white">Full Architecture & Quantization Matrix</h4>
+              <h4 className="text-sm font-bold uppercase tracking-wider text-white">Available profiles</h4>
               <p className="text-xs text-slate-400 mt-0.5">
-                Feasible models meeting your SLA are active; optimal green choice highlighted in emerald
+                Options that fit your priorities are shown clearly.
               </p>
             </div>
 
@@ -538,13 +542,13 @@ export const OptimizerPage: React.FC = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-white/[0.06] text-slate-400">
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Candidate Model</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Precision</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Accuracy</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Latency</th>
+                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Profile</th>
+                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Mode</th>
+                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Quality</th>
+                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Time</th>
                     <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Energy</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">CO₂e</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold text-right">Feasibility</th>
+                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Impact</th>
+                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04] font-mono">
@@ -565,11 +569,11 @@ export const OptimizerPage: React.FC = () => {
                           {c.name}
                           {isRec && (
                             <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[9px] font-extrabold text-emerald-300 border border-emerald-400/30 uppercase tracking-wider">
-                              Optimal
+                              Recommended
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-emerald-400 font-bold">{c.precision}</td>
+                        <td className="py-3 px-3 text-emerald-400 font-bold">{getModeLabel(c.precision)}</td>
                         <td className={`py-3 px-3 ${!c.meetsAcc ? 'text-rose-400' : 'text-slate-200'}`}>
                           {c.accuracy}%
                         </td>
@@ -585,11 +589,11 @@ export const OptimizerPage: React.FC = () => {
                             </span>
                           ) : c.isFeasible ? (
                             <span className="text-[10px] text-teal-300 bg-teal-500/15 px-2 py-0.5 rounded-full border border-teal-500/30">
-                              FEASIBLE
+                              AVAILABLE
                             </span>
                           ) : (
                             <span className="text-[10px] text-rose-300 bg-rose-500/15 px-2 py-0.5 rounded-full border border-rose-500/30">
-                              {!c.meetsAcc ? 'Acc SLA Pruned' : !c.meetsLat ? 'Lat Ceiling Pruned' : 'Pruned'}
+                              {!c.meetsAcc ? 'Quality' : !c.meetsLat ? 'Time' : 'Unavailable'}
                             </span>
                           )}
                         </td>

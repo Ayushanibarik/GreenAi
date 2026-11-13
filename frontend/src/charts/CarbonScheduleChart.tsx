@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   ReferenceArea,
 } from 'recharts';
-import { Sun, Flame, Sparkles } from 'lucide-react';
+import { Sun, Flame } from 'lucide-react';
 
 export interface HourGridPoint {
   hour: number;
@@ -69,26 +69,26 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
           <div className="flex items-center gap-2 mb-1">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400" />
             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-              Diurnal Grid Dynamics
+              Grid pattern
             </span>
           </div>
           <h3 className="text-base font-bold text-white tracking-tight">
-            24-Hour Regional Marginal Carbon Intensity
+            Regional grid impact through the day
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Odisha State Grid (ER) vs All-India National Baseline · CEA Baseline v19
+            A lower number means a lower impact.
           </p>
         </div>
 
         {/* Legend Pills */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="flex items-center gap-2 rounded-full glass-pill px-3 py-1 border border-emerald-500/30 text-emerald-300 font-medium">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span>Odisha Grid (ER)</span>
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(90,169,255,0.8)]" />
+            <span>Odisha</span>
           </div>
           <div className="flex items-center gap-2 rounded-full glass-pill px-3 py-1 border border-white/[0.06] text-slate-400 font-medium">
             <span className="h-2 w-2 rounded-full bg-teal-500" />
-            <span>National Average</span>
+          <span>National average</span>
           </div>
         </div>
       </div>
@@ -98,8 +98,8 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorOdishaGrid" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#10B981" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="#10B981" stopOpacity={0.0} />
+                <stop offset="0%" stopColor="#0A84FF" stopOpacity={0.45} />
+                <stop offset="100%" stopColor="#0A84FF" stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.04)" vertical={false} />
@@ -137,9 +137,9 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               <ReferenceArea
                 x1={data[optimalWindow.startHour]?.timeLabel}
                 x2={data[optimalWindow.endHour % 24]?.timeLabel}
-                fill="#10B981"
+                fill="#0A84FF"
                 fillOpacity={0.2}
-                stroke="#10B981"
+                stroke="#0A84FF"
                 strokeDasharray="4 4"
               />
             )}
@@ -159,20 +159,20 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
             <Area
               type="monotone"
               dataKey="odisha_ci"
-              stroke="#10B981"
+              stroke="#0A84FF"
               strokeWidth={3}
               fillOpacity={1}
               fill="url(#colorOdishaGrid)"
-              name="Odisha Grid Intensity"
+              name="Odisha"
             />
             <Line
               type="monotone"
               dataKey="national_ci"
-              stroke="#0D9488"
+              stroke="#5E5CE6"
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
-              name="National Average"
+              name="National average"
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -182,15 +182,15 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-white/[0.06] text-xs">
         <div className="flex items-center gap-2 rounded-xl glass-pill px-3 py-2 text-slate-400">
           <span className="h-2 w-2 rounded-full bg-slate-500" />
-          <span>00:00 - 05:00: Steady Thermal Base (0.70 kg)</span>
+          <span>00:00 – 05:00: steady period</span>
         </div>
         <div className="flex items-center gap-2 rounded-xl glass-pill px-3 py-2 text-emerald-300 border border-emerald-500/20 bg-emerald-500/5">
           <Sun className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          <span>11:00 - 15:00: Solar Influx Dip (0.54 kg/kWh)</span>
+          <span>11:00 – 15:00: lower impact</span>
         </div>
         <div className="flex items-center gap-2 rounded-xl glass-pill px-3 py-2 text-rose-300 border border-rose-500/20 bg-rose-500/5">
           <Flame className="h-3.5 w-3.5 text-rose-400 shrink-0" />
-          <span>18:00 - 21:00: Evening Coal Peak (0.98 kg/kWh)</span>
+          <span>18:00 – 21:00: higher impact</span>
         </div>
       </div>
     </div>

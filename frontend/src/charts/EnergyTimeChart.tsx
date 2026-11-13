@@ -38,25 +38,25 @@ interface EnergyTimeChartProps {
 
 export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
   data = defaultData,
-  title = 'Energy Consumption Profile: Baseline vs. Optimized',
+  title = 'Energy use over time',
 }) => {
   return (
-    <div className="glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg shadow-black/40">
+    <div className="glass-card p-5 sm:p-6">
       <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-white">{title}</h3>
+          <h3 className="text-sm font-semibold tracking-tight text-white">{title}</h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Empirical power draw comparison: FP32 Baseline vs. INT8/ONNX Accelerated Runtime
+            A simple comparison with the standard profile.
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-emerald-300 font-medium">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-            Optimized (INT8/ONNX)
+          <span className="glass-pill flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium text-emerald-200">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Current profile
           </span>
           <span className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-slate-400 font-medium">
             <span className="h-2 w-2 rounded-full bg-slate-500" />
-            Baseline (FP32)
+            Standard profile
           </span>
         </div>
       </div>
@@ -66,8 +66,8 @@ export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="appleColorOptimized" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.45} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
+              <stop offset="5%" stopColor="#0A84FF" stopOpacity={0.45} />
+              <stop offset="95%" stopColor="#0A84FF" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="appleColorBaseline" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
@@ -89,14 +89,14 @@ export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
                 color: '#f8fafc',
                 padding: '10px 14px',
               }}
-              itemStyle={{ color: '#34d399', fontWeight: 600 }}
+              itemStyle={{ color: '#8cc2ff', fontWeight: 600 }}
               labelStyle={{ color: '#94a3b8', marginBottom: '4px', fontWeight: 500 }}
               formatter={(val: number) => [`${val} W`, 'Power Draw']}
             />
             <Area
               type="monotone"
               dataKey="baseline_power"
-              name="Baseline FP32"
+              name="Standard profile"
               stroke="#64748b"
               strokeWidth={2}
               fillOpacity={1}
@@ -105,8 +105,8 @@ export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
             <Area
               type="monotone"
               dataKey="optimized_power"
-              name="Optimized INT8"
-              stroke="#10b981"
+              name="Current profile"
+              stroke="#0a84ff"
               strokeWidth={2.5}
               fillOpacity={1}
               fill="url(#appleColorOptimized)"

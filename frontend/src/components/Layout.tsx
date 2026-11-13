@@ -1,36 +1,20 @@
-import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { Menu, Zap, Globe, Cpu, Pause, Play, Sparkles } from 'lucide-react';
+import { Menu, Zap } from 'lucide-react';
 import { useTelemetryWebSocket } from '../services/websocket';
 import type { TelemetryPayload, HardwareReading } from '../types';
 
 export interface TelemetryContextType {
   data: TelemetryPayload | null;
   isConnected: boolean;
-  isSimulating: boolean;
-  toggleSimulation: () => void;
   hardwareHistory: HardwareReading[];
-  hardwareStatus: {
-    device: string;
-    port: string;
-    signal: string;
-    isOnline: boolean;
-  };
 }
 
 const TelemetryContext = createContext<TelemetryContextType>({
   data: null,
   isConnected: false,
-  isSimulating: true,
-  toggleSimulation: () => {},
   hardwareHistory: [],
-  hardwareStatus: {
-    device: 'ESP32-WROOM-32D',
-    port: 'COM3 (115200 baud)',
-    signal: '-62 dBm',
-    isOnline: true,
-  },
 });
 
 export const useTelemetry = () => useContext(TelemetryContext);
@@ -53,8 +37,6 @@ export const Layout: React.FC = () => {
   const location = useLocation();
   const { data: wsTelemetry, isConnected } = useTelemetryWebSocket();
 
-  // Simulation toggle state (defaults to true for instant demo satisfaction)
-  const [isSimulating, setIsSimulating] = useState(true);
   const [simTelemetry, setSimTelemetry] = useState<TelemetryPayload>({
     cpu_percent: 46.2,
     gpu_percent: 78.4,
@@ -70,13 +52,8 @@ export const Layout: React.FC = () => {
 
   const [hardwareHistory, setHardwareHistory] = useState<HardwareReading[]>(initialHardwareHistory);
 
-  const toggleSimulation = useCallback(() => {
-    setIsSimulating((prev) => !prev);
-  }, []);
-
-  // Simulator interval loop
   useEffect(() => {
-    if (!isSimulating && isConnected) return;
+    if (isConnected) return;
 
     const interval = setInterval(() => {
       setSimTelemetry((prev) => {
@@ -116,10 +93,10 @@ export const Layout: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isSimulating, isConnected]);
+  }, [isConnected]);
 
   const activeTelemetry: TelemetryPayload =
-    !isSimulating && isConnected && wsTelemetry
+    isConnected && wsTelemetry
       ? {
           ...wsTelemetry,
           voltage_v: wsTelemetry.voltage_v ?? 12.01,
@@ -129,62 +106,46 @@ export const Layout: React.FC = () => {
         }
       : simTelemetry;
 
-  const hardwareStatus = {
-    device: 'ESP32-WROOM-32D + INA219',
-    port: isConnected ? 'WebSocket /ws/telemetry' : 'COM3 (115200 baud)',
-    signal: 'Strong -62 dBm',
-    isOnline: isConnected || isSimulating,
-  };
-
   const getPageTitle = (pathname: string) => {
     switch (pathname) {
       case '/':
-        return { title: 'System Overview & Telemetry', sub: 'Instantaneous multi-source energy telemetry & carbon tracking' };
+        return 'Overview';
       case '/workloads':
-        return { title: 'Workload Orchestration', sub: 'Submit, schedule, and profile AI model execution jobs' };
+        return 'Runs';
       case '/benchmark':
-        return { title: 'Model Benchmark Matrix', sub: 'Empirical accuracy, latency, and energy scaling comparisons' };
+        return 'Performance';
       case '/optimizer':
-        return { title: 'Constrained Pareto Optimizer', sub: 'Multi-objective model selection subject to accuracy and latency SLAs' };
+        return 'Planning';
       case '/carbon':
-        return { title: 'Carbon Intelligence', sub: 'Diurnal regional grid forecasting & optimal green execution window dispatch' };
+        return 'Grid impact';
       case '/hardware':
-        return { title: 'Physical Hardware Telemetry', sub: 'Direct ESP32 + INA219 high-side DC current shunt measurements' };
+        return 'Devices';
       case '/settings':
-        return { title: 'System Settings', sub: 'Regional grid emission factors, telemetry rate, and platform preferences' };
+        return 'Settings';
       default:
-        return { title: 'GreenCompute AI Platform', sub: 'Autonomous energy-aware machine learning orchestrator' };
+        return 'GreenCompute';
     }
   };
 
-  const pageInfo = getPageTitle(location.pathname);
+  const pageTitle = getPageTitle(location.pathname);
 
   return (
     <TelemetryContext.Provider
       value={{
         data: activeTelemetry,
-        isConnected: isConnected || isSimulating,
-        isSimulating,
-        toggleSimulation,
+        isConnected,
         hardwareHistory,
-        hardwareStatus,
       }}
     >
-      <div className="flex h-screen w-screen overflow-hidden bg-[#080b11] text-slate-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
-        {/* Subtle Ambient Radial Lighting (Apple Pro Display Ambient Glow) */}
-        <div className="fixed top-0 left-1/4 -z-10 h-[500px] w-[500px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
-        <div className="fixed top-1/3 right-10 -z-10 h-[600px] w-[600px] rounded-full bg-cyan-500/4 blur-[140px] pointer-events-none" />
-        <div className="fixed bottom-10 left-1/3 -z-10 h-[400px] w-[400px] rounded-full bg-teal-500/4 blur-[120px] pointer-events-none" />
+      <div className="app-shell flex h-screen w-screen overflow-hidden text-slate-100 font-sans antialiased">
 
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          isWsConnected={isConnected || isSimulating}
         />
 
         <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-          {/* Frosted Glass Top Navigation Bar */}
-          <header className="flex h-20 shrink-0 items-center justify-between border-b border-white/[0.06] glass-panel bg-[#080b11]/70 px-5 lg:px-8 z-30">
+          <header className="glass-panel z-30 flex h-[72px] shrink-0 items-center justify-between border-b px-5 lg:px-8">
             <div className="flex items-center gap-4 min-w-0">
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -194,59 +155,14 @@ export const Layout: React.FC = () => {
                 <Menu className="h-5 w-5" />
               </button>
               <div className="min-w-0">
-                <h1 className="text-lg lg:text-xl font-bold tracking-tight text-white truncate">
-                  {pageInfo.title}
+                <h1 className="text-lg font-semibold tracking-tight text-white lg:text-xl truncate">
+                  {pageTitle}
                 </h1>
-                <p className="text-xs text-slate-400 hidden sm:block truncate mt-0.5">
-                  {pageInfo.sub}
-                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-              {/* Live Simulator Toggle Pill (Apple Control Center style) */}
-              <button
-                onClick={toggleSimulation}
-                className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 border ${
-                  isSimulating
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
-                    : 'glass-pill text-slate-400 hover:text-slate-200 hover:border-white/20'
-                }`}
-                title={isSimulating ? 'Pause telemetry stream' : 'Resume live stream'}
-              >
-                {isSimulating ? (
-                  <>
-                    <Pause className="h-3.5 w-3.5 text-emerald-400" />
-                    <span className="hidden md:inline">Simulator: 10Hz Feed</span>
-                    <span className="md:hidden">10Hz</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-3.5 w-3.5 text-slate-400" />
-                    <span>Paused</span>
-                  </>
-                )}
-              </button>
-
-              {/* Hardware Device Badge */}
-              <div className="hidden xl:flex items-center gap-2 rounded-full glass-pill px-3.5 py-1.5 text-xs text-slate-300">
-                <Cpu className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="font-mono text-emerald-400 font-semibold">{hardwareStatus.port.split(' ')[0]}</span>
-                <span className="text-slate-600">|</span>
-                <span className="text-[11px] text-slate-400 font-mono">{hardwareStatus.signal}</span>
-              </div>
-
-              {/* Regional Grid Badge */}
-              <div className="hidden sm:flex items-center gap-2 rounded-full glass-pill px-3.5 py-1.5 text-xs text-slate-300">
-                <Globe className="h-3.5 w-3.5 text-emerald-400" />
-                <span>IN-OD (Odisha)</span>
-                <span className="font-mono text-emerald-300 font-bold bg-emerald-500/15 px-1.5 py-0.5 rounded text-[11px]">
-                  0.82 kg/kWh
-                </span>
-              </div>
-
-              {/* Live Power Readout Pill with Ambient Pulse */}
-              <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-gradient-to-r from-emerald-500/20 to-teal-500/15 px-3.5 py-1.5 text-xs text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.25)]">
+              <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs text-emerald-200">
                 <Zap className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
                 <span className="font-mono font-bold tracking-tight">
                   {activeTelemetry.power_w.toFixed(1)} W
@@ -257,7 +173,7 @@ export const Layout: React.FC = () => {
 
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="mx-auto max-w-7xl space-y-6">
               <Outlet />
             </div>
           </main>

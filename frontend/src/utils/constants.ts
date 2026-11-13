@@ -1,9 +1,9 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export const COLORS = {
-  primary: '#10B981',
-  primaryLight: '#34D399',
-  primaryDark: '#059669',
+  primary: '#0A84FF',
+  primaryLight: '#5AA9FF',
+  primaryDark: '#0071E3',
   accent: '#6EE7B7',
   muted: '#6B7280',
   bg: '#030712',
@@ -17,8 +17,8 @@ export const COLORS = {
 } as const;
 
 export const CHART_COLORS = [
-  '#10B981', '#34D399', '#6EE7B7', '#A7F3D0',
-  '#059669', '#047857', '#065F46', '#064E3B',
+  '#0A84FF', '#5AA9FF', '#8CC2FF', '#B9D8FF',
+  '#0071E3', '#005BB5', '#004A95', '#003B76',
 ] as const;
 
 export const DEFAULT_CARBON_INTENSITY = 0.82; // kg CO2e/kWh India grid

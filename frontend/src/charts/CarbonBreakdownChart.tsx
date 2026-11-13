@@ -14,14 +14,14 @@ interface CarbonSegment {
 }
 
 const defaultData: CarbonSegment[] = [
-  { name: 'LLM Fine-Tuning (Llama-3-8B)', value: 412.5 },
-  { name: 'Vision Transformer Inference', value: 184.2 },
-  { name: 'BERT Embeddings Pipeline', value: 95.8 },
-  { name: 'ResNet-50 Batch Classifier', value: 68.4 },
-  { name: 'Speech Whisper Transcription', value: 142.1 },
+  { name: 'Content processing', value: 412.5 },
+  { name: 'Image processing', value: 184.2 },
+  { name: 'Text processing', value: 95.8 },
+  { name: 'Batch processing', value: 68.4 },
+  { name: 'Audio processing', value: 142.1 },
 ];
 
-const EMERALD_SHADES = ['#10B981', '#34D399', '#059669', '#06B6D4', '#6EE7B7', '#0EA5E9'];
+const EMERALD_SHADES = ['#0A84FF', '#5AA9FF', '#5E5CE6', '#8CC2FF', '#A8A5FF', '#6E6ADD'];
 
 interface CarbonBreakdownChartProps {
   data?: CarbonSegment[];
@@ -30,16 +30,16 @@ interface CarbonBreakdownChartProps {
 
 export const CarbonBreakdownChart: React.FC<CarbonBreakdownChartProps> = ({
   data = defaultData,
-  title = 'CO₂e Emissions by Workload Type',
+  title = 'Impact by activity',
 }) => {
   const totalCarbon = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg shadow-black/40">
+    <div className="glass-card p-5 sm:p-6">
       <div className="mb-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-white">{title}</h3>
+        <h3 className="text-sm font-semibold tracking-tight text-white">{title}</h3>
         <p className="text-xs text-slate-400 mt-0.5">
-          Total tracked emissions: <span className="text-emerald-400 font-mono font-bold">{totalCarbon.toFixed(1)} g CO₂e</span>
+          Tracked impact: <span className="text-emerald-400 font-mono font-bold">{totalCarbon.toFixed(1)} g CO₂e</span>
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export const CarbonBreakdownChart: React.FC<CarbonBreakdownChartProps> = ({
                 <Cell
                   key={`cell-${index}`}
                   fill={EMERALD_SHADES[index % EMERALD_SHADES.length]}
-                  stroke="#080b11"
+                  stroke="#15161a"
                   strokeWidth={3}
                 />
               ))}

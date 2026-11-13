@@ -19,7 +19,7 @@ interface HardwareTelemetryChartProps {
 
 export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
   data,
-  title = 'ESP32 + INA219 Real-Time Telemetry Stream',
+  title = 'Power readings over time',
 }) => {
   const [selectedChannel, setSelectedChannel] = useState<'all' | 'power' | 'current' | 'voltage' | 'energy'>('all');
 
@@ -44,7 +44,7 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
   }));
 
   const channels = [
-    { id: 'all', label: 'All 4 Channels' },
+    { id: 'all', label: 'All readings' },
     { id: 'power', label: 'Power (W)' },
     { id: 'current', label: 'Current (mA)' },
     { id: 'voltage', label: 'Voltage (V)' },
@@ -58,16 +58,7 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
 
       <div className="relative mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-              Hardware Oscilloscope Channel
-            </span>
-          </div>
           <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Physical current shunt telemetry sampled at 10Hz · Precision ±0.1% FS
-          </p>
         </div>
 
         {/* Channel Segmented Control (Apple Glass Pills) */}
@@ -80,7 +71,7 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 onClick={() => setSelectedChannel(ch.id)}
                 className={`rounded-xl px-3 py-1.5 font-semibold transition-all duration-200 cursor-pointer ${
                   active
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-950/60'
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-950/40'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -106,8 +97,8 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
             {/* Primary Left YAxis: Power or Current */}
             <YAxis
               yAxisId="primary"
-              stroke="#10B981"
-              tick={{ fill: '#34D399', fontSize: 10, fontFamily: 'monospace' }}
+              stroke="#0A84FF"
+              tick={{ fill: '#8CC2FF', fontSize: 10, fontFamily: 'monospace' }}
               unit={
                 selectedChannel === 'current'
                   ? ' mA'
@@ -158,10 +149,10 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 type="monotone"
                 dataKey="power_w"
                 name="Power Draw (W)"
-                stroke="#10B981"
+                stroke="#0A84FF"
                 strokeWidth={3}
                 dot={false}
-                activeDot={{ r: 5, fill: '#34D399', stroke: '#064e3b', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: '#8CC2FF', stroke: '#003b76', strokeWidth: 2 }}
               />
             )}
 
