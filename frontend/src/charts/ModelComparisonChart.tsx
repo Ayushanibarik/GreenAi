@@ -19,12 +19,12 @@ interface ConfigMetric {
 }
 
 const defaultData: ConfigMetric[] = [
-  { config: 'PyTorch FP32', energy_wh: 48.2, latency_ms: 125, accuracy_pct: 94.6, memory_mb: 1840 },
-  { config: 'PyTorch FP16', energy_wh: 29.5, latency_ms: 78, accuracy_pct: 94.3, memory_mb: 960 },
-  { config: 'ONNX FP32', energy_wh: 34.1, latency_ms: 88, accuracy_pct: 94.6, memory_mb: 1420 },
-  { config: 'ONNX INT8', energy_wh: 14.8, latency_ms: 38, accuracy_pct: 93.8, memory_mb: 480 },
-  { config: 'TensorRT INT8', energy_wh: 11.2, latency_ms: 29, accuracy_pct: 93.5, memory_mb: 410 },
+  { config: 'ResNet18 FP32 Baseline', energy_wh: 4.86, latency_ms: 114, accuracy_pct: 93.2, memory_mb: 455 },
+  { config: 'ResNet18 INT8 Dynamic', energy_wh: 5.52, latency_ms: 124, accuracy_pct: 92.4, memory_mb: 432 },
+  { config: 'MobileNetV3 FP32', energy_wh: 3.82, latency_ms: 85, accuracy_pct: 89.6, memory_mb: 387 },
+  { config: 'MobileNetV3 ONNX Runtime', energy_wh: 1.18, latency_ms: 9, accuracy_pct: 89.4, memory_mb: 380 },
 ];
+
 
 interface ModelComparisonChartProps {
   data?: ConfigMetric[];
