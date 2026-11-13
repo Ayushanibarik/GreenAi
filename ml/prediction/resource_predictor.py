@@ -84,6 +84,16 @@ class MLResourcePredictor:
         self._fitted = False
         self.metrics: dict[str, float] = {}
 
+    @classmethod
+    def load_default(cls) -> "MLResourcePredictor":
+        """Load the pre-trained default model or fit synthetic on the fly."""
+        predictor = cls()
+        if DEFAULT_SAVED_MODEL_PATH.exists():
+            predictor.load(DEFAULT_SAVED_MODEL_PATH)
+        else:
+            predictor.pretrain_with_synthetic()
+        return predictor
+
     def extract_features(self, config: dict[str, Any]) -> list[float]:
         """Extract [model_params_m, input_size, precision_bits, batch_size, is_gpu]."""
         # 1. model_params_m
@@ -185,6 +195,9 @@ class MLResourcePredictor:
             "predicted_energy_wh": max(round(pred_energy, 6), 0.0),
             "predicted_latency_ms": max(round(pred_lat, 2), 0.1),
             "predicted_memory_mb": max(round(pred_mem, 1), 10.0),
+            "energy_wh": max(round(pred_energy, 6), 0.0),
+            "latency_ms": max(round(pred_lat, 2), 0.1),
+            "memory_mb": max(round(pred_mem, 1), 10.0),
         }
 
     def save(self, path: str | Path | None = None) -> Path:

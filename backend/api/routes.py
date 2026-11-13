@@ -428,6 +428,7 @@ async def predict_model_resources(req: PredictRequest):
 
 
 @api_router.post("/optimize", response_model=OptimizeResponse, tags=["optimizer"])
+@api_router.post("/optimizer/recommend", response_model=OptimizeResponse, tags=["optimizer"])
 async def run_model_optimization(req: OptimizeRequest):
     """Run multi-candidate quantization and constrained green optimization."""
     ci = carbon_engine.get_carbon_intensity(region=req.region)
