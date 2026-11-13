@@ -615,6 +615,7 @@ async def get_carbon_intensities():
 
 @api_router.post("/schedule", tags=["scheduler"])
 @api_router.post("/schedule/recommend", tags=["scheduler"])
+@api_router.post("/scheduler/recommend", tags=["scheduler"])
 async def schedule_workload(req: ScheduleRequest):
     """Find the lowest-emission window to dispatch batch compute before a deadline."""
     from backend.scheduler.carbon_scheduler import CarbonAwareScheduler
@@ -634,6 +635,7 @@ async def schedule_workload(req: ScheduleRequest):
 
 
 @api_router.get("/schedule/forecast", tags=["scheduler"])
+@api_router.get("/scheduler/forecast", tags=["scheduler"])
 async def get_schedule_forecast(
     region: str = Query(default="odisha"),
     hours: int = Query(default=24, ge=6, le=72),
