@@ -3,91 +3,105 @@ import { Zap, Activity } from 'lucide-react';
 
 interface EnergyGaugeProps {
   currentPower: number; // Watts
-  maxPower?: number; // default e.g. 250W
-  title?: string;
-  subtitle?: string;
+  maxPower?: number; // Watts, defaults to 250W
 }
 
 export const EnergyGauge: React.FC<EnergyGaugeProps> = ({
   currentPower,
   maxPower = 250,
-  title = 'Live Power Consumption',
-  subtitle = 'Instantaneous Draw',
 }) => {
-  const percentage = Math.min(Math.max((currentPower / maxPower) * 100, 0), 100);
-  const radius = 70;
-  const strokeWidth = 12;
-  const circumference = Math.PI * radius; // 180-deg half-circle
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const percentage = Math.min(100, Math.max(0, (currentPower / maxPower) * 100));
+
+  // Circular gauge geometry (240 degree arc)
+  const radius = 78;
+  const strokeWidth = 14;
+  const circumference = 2 * Math.PI * radius;
+  const arcLength = circumference * (240 / 360);
+  const strokeDashoffset = arcLength - (arcLength * percentage) / 100;
 
   return (
-    <div className="relative overflow-hidden flex flex-col items-center justify-center rounded-2xl glass-card p-5 border border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.3)]">
-      {/* Top subtle highlight */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+    <div className="glass-card relative overflow-hidden p-6 flex flex-col items-center justify-between min-h-[340px]">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-44 w-44 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
 
-      <div className="flex w-full items-center justify-between border-b border-white/[0.06] pb-3 mb-1">
+      {/* Header */}
+      <div className="w-full flex items-center justify-between border-b border-white/[0.06] pb-3 mb-2">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-            <Zap className="h-3.5 w-3.5" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <Zap className="h-4 w-4" />
           </div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">{title}</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-white">
+            Active Power Draw
+          </span>
         </div>
-        <span className="text-[11px] text-slate-400 font-mono bg-white/[0.04] px-2 py-0.5 rounded-full border border-white/[0.06]">
-          Scale: {maxPower}W
+        <span className="rounded-full glass-pill px-2.5 py-0.5 text-[10px] font-mono text-emerald-300 font-bold">
+          10Hz Shunt
         </span>
       </div>
 
-      <div className="relative my-3 flex items-center justify-center">
-        {/* Glow behind the arc */}
-        <div className="absolute top-4 h-24 w-36 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none" />
-
-        <svg className="w-52 h-32 overflow-visible" viewBox="0 0 160 92">
-          {/* Background Track */}
-          <path
-            d="M 10 82 A 70 70 0 0 1 150 82"
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.08)"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-          {/* Progress Arc */}
-          <path
-            d="M 10 82 A 70 70 0 0 1 150 82"
-            fill="none"
-            stroke="url(#appleEmeraldGradient)"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            className="transition-all duration-700 ease-out"
-          />
+      {/* Apple Watch Style SVG Activity Arc */}
+      <div className="relative flex items-center justify-center my-auto">
+        <svg className="w-52 h-52 -rotate-[210deg] transform" viewBox="0 0 200 200">
           <defs>
-            <linearGradient id="appleEmeraldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#059669" />
+            <linearGradient id="appleEnergyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#34d399" />
               <stop offset="60%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#34d399" />
+              <stop offset="100%" stopColor="#06b6d4" />
             </linearGradient>
+            <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
           </defs>
+
+          {/* Background Track */}
+          <circle
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="transparent"
+            stroke="rgba(255, 255, 255, 0.06)"
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${arcLength} ${circumference}`}
+            strokeLinecap="round"
+          />
+
+          {/* Active Gradient Arc */}
+          <circle
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="transparent"
+            stroke="url(#appleEnergyGradient)"
+            strokeWidth={strokeWidth}
+            strokeDasharray={`${arcLength} ${circumference}`}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            filter="url(#gaugeGlow)"
+            className="transition-all duration-300 ease-out"
+          />
         </svg>
 
-        {/* Center Readout */}
-        <div className="absolute bottom-1 text-center">
-          <div className="flex items-baseline justify-center gap-1">
-            <span className="text-3xl lg:text-4xl font-extrabold text-white font-mono tracking-tight drop-shadow-sm">
-              {currentPower.toFixed(1)}
-            </span>
-            <span className="text-sm font-bold text-emerald-400 font-mono">W</span>
-          </div>
-          <span className="text-[11px] text-slate-400 font-medium">{subtitle}</span>
+        {/* Center Digital Readout */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span className="text-4xl font-extrabold text-white tracking-tight font-mono drop-shadow-md">
+            {currentPower.toFixed(1)}
+          </span>
+          <span className="text-xs font-bold text-emerald-400 font-mono tracking-wider mt-0.5">
+            WATTS
+          </span>
+          <span className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">
+            Dynamic Load
+          </span>
         </div>
       </div>
 
-      <div className="flex w-full justify-between px-3 text-[11px] font-mono text-slate-400 pt-2 border-t border-white/[0.05]">
-        <span>0W</span>
-        <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-          {percentage.toFixed(0)}% Load Capacity
+      {/* Footer Pill Status */}
+      <div className="w-full flex items-center justify-between rounded-2xl glass-pill px-4 py-2.5 border border-white/[0.06] text-xs">
+        <span className="text-slate-400 font-medium">Headroom ({maxPower}W Max)</span>
+        <span className="font-mono font-bold text-emerald-300">
+          {percentage.toFixed(0)}% Utilized
         </span>
-        <span>{maxPower}W</span>
       </div>
     </div>
   );

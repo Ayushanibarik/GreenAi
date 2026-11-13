@@ -14,11 +14,10 @@ import {
   Cpu,
   Play,
   Pause,
-  Wifi,
-  Radio,
-  Sparkles,
   Layers,
-  Flame,
+  Sparkles,
+  Activity,
+  ShieldCheck,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -67,57 +66,57 @@ export const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Top Hero Glass Banner with Live Telemetry State */}
-      <div className="relative overflow-hidden rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
-        {/* Decorative background glow */}
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+    <div className="space-y-7 pb-8">
+      {/* Apple 2030 / Google DeepMind Hero Bento Card */}
+      <div className="glass-card relative overflow-hidden p-7 sm:p-9">
+        {/* Subtle Ambient Radial Lighting */}
+        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
 
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-1.5">
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-3xl">
             <div className="flex items-center gap-2">
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                Autonomous Energy Governance Engine
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                GreenCompute AI · Autonomous Energy Governance
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white drop-shadow-sm">
-              Real-Time AI Telemetry & Pareto Optimization
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              Zero Compromise. <span className="text-gradient-emerald">62.9% Less Energy.</span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Continuous empirical shunt profiling via ESP32 & INA219, regional grid emissions forecasting for Odisha Grid (0.82 kg/kWh), and zero-loss model quantization.
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Empirical shunt telemetry with ESP32 & INA219, multi-objective Pareto model optimization, and regional carbon-aware load shifting for the Indian electricity grid.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Hardware badge */}
-            <div className="flex items-center gap-2 rounded-2xl glass-pill px-4 py-2 border border-white/[0.08] text-xs">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* Shunt Sensor Chip */}
+            <div className="flex items-center gap-2 rounded-2xl glass-pill px-4 py-2.5 text-xs">
               <Cpu className="h-4 w-4 text-emerald-400" />
-              <div className="leading-tight">
-                <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Edge Sensor</span>
-                <span className="font-mono text-emerald-300 font-bold">{hardwareStatus.port.split(' ')[0]}</span>
+              <div>
+                <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Sensor Hardware</span>
+                <span className="font-mono text-emerald-300 font-bold">{hardwareStatus.device.split(' ')[0]}</span>
               </div>
             </div>
 
-            {/* Live Simulator Switch */}
+            {/* 10Hz Feed Button */}
             <button
               onClick={toggleSimulation}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all duration-300 border shadow-lg ${
+              className={`flex items-center gap-2 rounded-2xl px-5 py-2.5 text-xs font-bold transition-all duration-300 cursor-pointer shadow-lg ${
                 isSimulating
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 border-emerald-400/40 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-                  : 'glass-pill text-slate-300 hover:text-white border-white/10 hover:border-white/20'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-emerald-950/60 hover:brightness-110 active:scale-95'
+                  : 'glass-pill text-slate-300 hover:text-white border-white/10'
               }`}
             >
               {isSimulating ? (
                 <>
-                  <Pause className="h-4 w-4 text-white" />
+                  <Pause className="h-3.5 w-3.5 text-white" />
                   <span>10Hz Feed Active</span>
                 </>
               ) : (
                 <>
-                  <Play className="h-4 w-4 text-slate-400" />
-                  <span>Start Feed Simulator</span>
+                  <Play className="h-3.5 w-3.5 text-slate-400" />
+                  <span>Start Feed</span>
                 </>
               )}
             </button>
@@ -125,46 +124,46 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 4 Top Metric Cards (Apple HIG Glass Cards) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* 4 Core Hero Metric Bento Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Total Energy Saved"
           value="1,428.6"
           unit="Wh"
-          trend={{ value: 44.8, isPositive: true, label: 'vs FP32 baseline' }}
+          trend={{ value: 44.8, isPositive: true, label: 'vs baseline' }}
           icon={<Zap className="h-5 w-5" />}
-          subtext="Net cumulative savings across workloads"
+          subtext="Net savings across AI workloads"
         />
 
         <MetricCard
-          label="CO₂ Avoided"
+          label="Carbon Avoided"
           value="1,171.5"
           unit="g CO₂e"
           trend={{ value: 44.8, isPositive: true, label: 'grid offset' }}
           icon={<Leaf className="h-5 w-5" />}
-          subtext="Based on 0.82 kg/kWh Odisha grid"
+          subtext="Odisha Grid factor 0.82 kg/kWh"
         />
 
         <MetricCard
-          label="Workloads Governed"
+          label="Governed Workloads"
           value="84"
           unit="runs"
           trend={{ value: 18.0, isPositive: true, label: 'this week' }}
           icon={<CheckCircle2 className="h-5 w-5" />}
-          subtext="100% met SLA accuracy thresholds"
+          subtext="100% SLA accuracy compliance"
         />
 
         <MetricCard
-          label="Avg Latency Reduction"
+          label="Latency Speedup"
           value="58.2"
           unit="%"
-          trend={{ value: 21.0, isPositive: true, label: 'speedup' }}
+          trend={{ value: 21.0, isPositive: true, label: 'gain' }}
           icon={<Timer className="h-5 w-5" />}
-          subtext="Throughput increased by 2.1x"
+          subtext="Throughput improved by 2.1x"
         />
       </div>
 
-      {/* Main Charts & Telemetry Visuals Row */}
+      {/* Primary Analytics & Live Vitals Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <EnergyTimeChart />
@@ -174,41 +173,39 @@ export const Dashboard: React.FC = () => {
           <EnergyGauge currentPower={currentPower} maxPower={250} />
 
           {/* Quick Hardware Vitals (Material 3 Surface) */}
-          <div className="rounded-2xl glass-card p-5 border border-white/[0.08] shadow-lg">
+          <div className="glass-card p-5">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-3">
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                  <Cpu className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                  Live Edge Telemetry
+                <Activity className="h-4 w-4 text-emerald-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-white">
+                  Live Shunt Telemetry
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                10Hz Shunt
+              <span className="text-[10px] font-mono text-emerald-300 rounded-full glass-pill px-2.5 py-0.5">
+                Precision ±0.1%
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 text-xs">
-              <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
+              <div className="rounded-2xl glass-pill p-3 border border-white/[0.06]">
                 <span className="text-slate-400 block text-[10px] font-medium uppercase tracking-wider">Bus Voltage</span>
                 <span className="text-emerald-300 font-mono font-bold text-base mt-0.5 block">
                   {telemetry?.voltage_v ? `${telemetry.voltage_v.toFixed(2)} V` : '12.02 V'}
                 </span>
               </div>
-              <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
+              <div className="rounded-2xl glass-pill p-3 border border-white/[0.06]">
                 <span className="text-slate-400 block text-[10px] font-medium uppercase tracking-wider">Load Current</span>
                 <span className="text-white font-mono font-bold text-base mt-0.5 block">
                   {telemetry?.current_ma ? `${telemetry.current_ma.toLocaleString()} mA` : '7,038 mA'}
                 </span>
               </div>
-              <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
+              <div className="rounded-2xl glass-pill p-3 border border-white/[0.06]">
                 <span className="text-slate-400 block text-[10px] font-medium uppercase tracking-wider">Host CPU Load</span>
                 <span className="text-slate-200 font-mono font-bold text-base mt-0.5 block">
                   {telemetry ? `${telemetry.cpu_percent.toFixed(1)}%` : '46.2%'}
                 </span>
               </div>
-              <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
+              <div className="rounded-2xl glass-pill p-3 border border-white/[0.06]">
                 <span className="text-slate-400 block text-[10px] font-medium uppercase tracking-wider">Host GPU / NPU</span>
                 <span className="text-emerald-400 font-mono font-bold text-base mt-0.5 block">
                   {telemetry ? `${telemetry.gpu_percent.toFixed(1)}%` : '78.4%'}
@@ -219,20 +216,20 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Carbon Breakdown & Recent Workload Table */}
+      {/* Carbon Breakdown & Borderless Workload Activity */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">
           <CarbonBreakdownChart />
         </div>
 
-        <div className="lg:col-span-2 rounded-3xl glass-card p-6 border border-white/[0.08] shadow-lg">
+        <div className="lg:col-span-2 glass-card p-6">
           <div className="mb-4 flex items-center justify-between border-b border-white/[0.06] pb-3">
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                 <Layers className="h-4 w-4 text-emerald-400" />
-                Recent Workload Optimizations
+                Recent Workload Governance
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">Governed by GreenCompute Multi-Objective Engine</p>
+              <p className="text-xs text-slate-400 mt-0.5">Optimized by GreenCompute Multi-Objective Engine</p>
             </div>
             <Link
               to="/workloads"
@@ -245,29 +242,29 @@ export const Dashboard: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/[0.06] text-slate-400">
-                  <th className="pb-3 font-semibold uppercase tracking-wider text-[10px]">Workload ID</th>
-                  <th className="pb-3 font-semibold uppercase tracking-wider text-[10px]">Model / Pipeline</th>
-                  <th className="pb-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                  <th className="pb-3 font-semibold uppercase tracking-wider text-[10px]">Energy Saved</th>
-                  <th className="pb-3 font-semibold uppercase tracking-wider text-[10px]">CO₂ Avoided</th>
-                  <th className="pb-3 font-semibold uppercase tracking-wider text-[10px] text-right">Time</th>
+                <tr className="border-b border-white/[0.06] text-slate-400 bg-white/[0.02]">
+                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Workload ID</th>
+                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Model / Pipeline</th>
+                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Status</th>
+                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Energy Saved</th>
+                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">CO₂ Avoided</th>
+                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px] text-right">Time</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
                 {recentWorkloads.map((wl) => (
                   <tr key={wl.id} className="hover:bg-white/[0.03] transition-colors">
-                    <td className="py-3.5 font-mono font-medium text-emerald-400">{wl.id}</td>
-                    <td className="py-3.5 text-white">
-                      <div className="font-medium text-slate-200">{wl.name}</div>
+                    <td className="py-3.5 px-4 font-mono font-medium text-emerald-400">{wl.id}</td>
+                    <td className="py-3.5 px-4 text-white">
+                      <div className="font-semibold text-slate-200">{wl.name}</div>
                       <span className="text-[10px] text-slate-500 font-mono">{wl.model_type}</span>
                     </td>
-                    <td className="py-3.5">
+                    <td className="py-3.5 px-4">
                       <StatusBadge status={wl.status} />
                     </td>
-                    <td className="py-3.5 font-mono text-emerald-300 font-semibold">{wl.energy_saved}</td>
-                    <td className="py-3.5 font-mono text-slate-300">{wl.carbon_avoided}</td>
-                    <td className="py-3.5 text-right text-slate-400 text-[11px] font-mono">{wl.created_at}</td>
+                    <td className="py-3.5 px-4 font-mono text-emerald-300 font-semibold">{wl.energy_saved}</td>
+                    <td className="py-3.5 px-4 font-mono text-slate-300">{wl.carbon_avoided}</td>
+                    <td className="py-3.5 px-4 text-right text-slate-400 text-[11px] font-mono">{wl.created_at}</td>
                   </tr>
                 ))}
               </tbody>
