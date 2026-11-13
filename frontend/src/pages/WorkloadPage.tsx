@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import StatusBadge from '../components/StatusBadge';
-import { PlusCircle, Search, Filter, Layers, Zap, Clock, RefreshCw } from 'lucide-react';
+import { PlusCircle, Search, Filter, Layers, Zap, Clock, RefreshCw, X, Sparkles } from 'lucide-react';
 import type { Workload } from '../types';
 
 const mockWorkloads: Workload[] = [
@@ -119,43 +119,55 @@ export const WorkloadPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner and Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white">Workload Pipeline Management</h2>
-          <p className="text-xs text-gray-400">
-            Submit machine learning jobs with strict energy and latency SLAs
-          </p>
+      <div className="relative overflow-hidden rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
+        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                Workload Orchestrator
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Workload Pipeline & Queue Management
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+              Dispatch and monitor AI workloads with strict energy, carbon, and latency SLA guarantees.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer self-start sm:self-auto"
+          >
+            <PlusCircle className="h-4 w-4" />
+            <span>Submit New Workload</span>
+          </button>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-900/30 hover:bg-emerald-500 transition-colors"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Submit New Workload
-        </button>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 rounded-xl border border-gray-800 bg-gray-900/60 p-4 backdrop-blur-sm">
+      {/* Filter and Search Bar (Apple Segmented Style) */}
+      <div className="flex flex-col sm:flex-row gap-3 rounded-2xl glass-card p-4 border border-white/[0.08] shadow-lg">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search by workload name or ID..."
+            placeholder="Search workloads by name, model, or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border border-gray-800 bg-gray-950 py-2 pl-9 pr-3 text-xs text-gray-200 placeholder-gray-500 focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl glass-pill py-2.5 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 border border-white/[0.06] focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-gray-500" />
+          <Filter className="h-4 w-4 text-slate-400" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-gray-200 focus:border-emerald-500 focus:outline-none"
+            className="rounded-xl glass-pill px-3.5 py-2.5 text-xs text-slate-200 border border-white/[0.06] focus:border-emerald-500/50 focus:outline-none cursor-pointer bg-slate-900"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">All Statuses ({workloads.length})</option>
             <option value="completed">Completed</option>
             <option value="running">Running</option>
             <option value="pending">Pending</option>
@@ -165,45 +177,45 @@ export const WorkloadPage: React.FC = () => {
       </div>
 
       {/* Workload History Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900/60 backdrop-blur-sm">
+      <div className="overflow-hidden rounded-3xl glass-card border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-gray-950/70 text-gray-400 border-b border-gray-800">
-              <tr>
-                <th className="px-5 py-3 font-semibold">ID</th>
-                <th className="px-5 py-3 font-semibold">Workload / Model</th>
-                <th className="px-5 py-3 font-semibold">Status</th>
-                <th className="px-5 py-3 font-semibold">Energy (Wh)</th>
-                <th className="px-5 py-3 font-semibold">Emissions</th>
-                <th className="px-5 py-3 font-semibold">Latency</th>
-                <th className="px-5 py-3 font-semibold">Accuracy</th>
-                <th className="px-5 py-3 font-semibold text-right">Submitted</th>
+            <thead>
+              <tr className="border-b border-white/[0.06] text-slate-400 bg-white/[0.02]">
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">ID</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Workload / Model</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Status</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Emissions</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px] text-right">Submitted</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800/60">
+            <tbody className="divide-y divide-white/[0.04]">
               {filteredWorkloads.map((wl) => (
-                <tr key={wl.id} className="hover:bg-gray-800/30 transition-colors">
-                  <td className="px-5 py-4 font-mono font-medium text-emerald-400">{wl.id}</td>
-                  <td className="px-5 py-4">
-                    <div className="font-medium text-white">{wl.name}</div>
-                    <div className="text-[10px] text-gray-500">{wl.model_type}</div>
+                <tr key={wl.id} className="hover:bg-white/[0.03] transition-colors">
+                  <td className="px-6 py-4 font-mono font-medium text-emerald-400">{wl.id}</td>
+                  <td className="px-6 py-4">
+                    <div className="font-semibold text-white">{wl.name}</div>
+                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">{wl.model_type}</div>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-6 py-4">
                     <StatusBadge status={wl.status} />
                   </td>
-                  <td className="px-5 py-4 font-mono text-emerald-300">
+                  <td className="px-6 py-4 font-mono font-semibold text-emerald-300">
                     {wl.energy_wh > 0 ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
                   </td>
-                  <td className="px-5 py-4 font-mono text-gray-300">
+                  <td className="px-6 py-4 font-mono text-slate-300">
                     {wl.carbon_g > 0 ? `${wl.carbon_g.toFixed(1)} g CO₂` : '—'}
                   </td>
-                  <td className="px-5 py-4 font-mono text-gray-300">
+                  <td className="px-6 py-4 font-mono text-slate-300">
                     {wl.latency_ms > 0 ? `${wl.latency_ms} ms` : '—'}
                   </td>
-                  <td className="px-5 py-4 font-mono text-gray-300">
+                  <td className="px-6 py-4 font-mono text-slate-300">
                     {wl.accuracy > 0 ? `${wl.accuracy.toFixed(1)}%` : '—'}
                   </td>
-                  <td className="px-5 py-4 text-right text-gray-500 font-mono text-[11px]">
+                  <td className="px-6 py-4 text-right text-slate-400 font-mono text-[11px]">
                     {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>
@@ -213,43 +225,48 @@ export const WorkloadPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal for Submitting New Workload */}
+      {/* Modal for Submitting New Workload (Apple Sheet Style) */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-gray-950 p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Layers className="h-5 w-5 text-emerald-400" />
-                Submit New Green Workload
-              </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md transition-opacity">
+          <div className="w-full max-w-lg rounded-3xl glass-card bg-[#0b0f19]/95 p-6 sm:p-7 border border-white/[0.12] shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  <Layers className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">Submit Green Workload</h3>
+                  <p className="text-[11px] text-slate-400">Specify pipeline accuracy & latency thresholds</p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="rounded-full p-1.5 text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="mt-4 space-y-4 text-xs">
+            <form onSubmit={handleCreate} className="mt-5 space-y-4 text-xs">
               <div>
-                <label className="block font-medium text-gray-300 mb-1">Workload Name</label>
+                <label className="block font-medium text-slate-300 mb-1.5">Workload Identifier / Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. VisionTransformer-ViT-B16 Eval"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full rounded-lg border border-gray-800 bg-gray-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-gray-300 mb-1">Model Architecture</label>
+                  <label className="block font-medium text-slate-300 mb-1.5">Model Architecture</label>
                   <select
                     value={formData.model_type}
                     onChange={(e) => setFormData({ ...formData, model_type: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none bg-slate-900"
                   >
                     <option value="Computer Vision">Computer Vision (CNN / ViT)</option>
                     <option value="NLP Inference">NLP Inference (BERT / RoBERTa)</option>
@@ -259,11 +276,11 @@ export const WorkloadPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-medium text-gray-300 mb-1">Target Quantization</label>
+                  <label className="block font-medium text-slate-300 mb-1.5">Target Quantization</label>
                   <select
                     value={formData.precision}
                     onChange={(e) => setFormData({ ...formData, precision: e.target.value })}
-                    className="w-full rounded-lg border border-gray-800 bg-gray-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none bg-slate-900"
                   >
                     <option value="INT8">INT8 (Max Energy Reduction)</option>
                     <option value="ONNX">ONNX Runtime Graph Optimized</option>
@@ -273,52 +290,57 @@ export const WorkloadPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block font-medium text-gray-300 mb-1">
-                    Min Accuracy SLA ({formData.min_accuracy}%)
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium text-slate-300">Min Accuracy SLA</label>
+                    <span className="font-mono text-emerald-400 font-bold">{formData.min_accuracy}%</span>
+                  </div>
                   <input
                     type="range"
                     min="80"
                     max="99"
                     value={formData.min_accuracy}
                     onChange={(e) => setFormData({ ...formData, min_accuracy: Number(e.target.value) })}
-                    className="w-full accent-emerald-500"
+                    className="w-full accent-emerald-500 cursor-pointer"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-medium text-gray-300 mb-1">
-                    Max Latency SLA ({formData.max_latency} ms)
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium text-slate-300">Max Latency SLA</label>
+                    <span className="font-mono text-emerald-400 font-bold">{formData.max_latency} ms</span>
+                  </div>
                   <input
                     type="range"
                     min="10"
                     max="500"
                     value={formData.max_latency}
                     onChange={(e) => setFormData({ ...formData, max_latency: Number(e.target.value) })}
-                    className="w-full accent-emerald-500"
+                    className="w-full accent-emerald-500 cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/50 p-3 text-[11px] text-emerald-300">
-                🌱 GreenCompute Orchestrator will benchmark candidate execution profiles and select the minimum energy-carbon configuration satisfying your SLA.
+              <div className="rounded-2xl glass-pill p-3.5 border border-emerald-500/30 text-[11px] text-emerald-300 flex items-start gap-2.5">
+                <Sparkles className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                <span>
+                  GreenCompute Orchestrator will benchmark candidate execution profiles and select the minimum energy-carbon configuration satisfying your SLA.
+                </span>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+              <div className="flex justify-end gap-3 pt-3 border-t border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg bg-gray-800 px-4 py-2 text-gray-300 hover:bg-gray-700"
+                  className="rounded-xl glass-pill px-4 py-2.5 text-slate-300 hover:text-white transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-500 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 font-bold text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting && <RefreshCw className="h-3.5 w-3.5 animate-spin" />}
                   Dispatch to Orchestrator

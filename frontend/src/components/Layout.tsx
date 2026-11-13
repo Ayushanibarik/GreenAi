@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { Menu, Zap, ShieldCheck, Globe, Cpu, Radio, Play, Pause } from 'lucide-react';
+import { Menu, Zap, Globe, Cpu, Pause, Play, Sparkles } from 'lucide-react';
 import { useTelemetryWebSocket } from '../services/websocket';
 import type { TelemetryPayload, HardwareReading } from '../types';
 
@@ -80,7 +80,6 @@ export const Layout: React.FC = () => {
 
     const interval = setInterval(() => {
       setSimTelemetry((prev) => {
-        // Natural fluctuations around realistic inference benchmarks
         const jitterPower = (Math.random() - 0.48) * 8.0;
         const nextPower = Math.max(45.0, Math.min(185.0, prev.power_w + jitterPower));
         const nextEnergy = prev.energy_wh + (nextPower * 1.0) / 3600;
@@ -119,7 +118,6 @@ export const Layout: React.FC = () => {
     return () => clearInterval(interval);
   }, [isSimulating, isConnected]);
 
-  // Use real WS data if connected and simulation is disabled, otherwise simulated telemetry
   const activeTelemetry: TelemetryPayload =
     !isSimulating && isConnected && wsTelemetry
       ? {
@@ -141,23 +139,25 @@ export const Layout: React.FC = () => {
   const getPageTitle = (pathname: string) => {
     switch (pathname) {
       case '/':
-        return 'System Overview & Energy Dashboard';
+        return { title: 'System Overview & Telemetry', sub: 'Instantaneous multi-source energy telemetry & carbon tracking' };
       case '/workloads':
-        return 'Workload Management & History';
+        return { title: 'Workload Orchestration', sub: 'Submit, schedule, and profile AI model execution jobs' };
       case '/benchmark':
-        return 'Model Benchmarking & Quantization Matrix';
+        return { title: 'Model Benchmark Matrix', sub: 'Empirical accuracy, latency, and energy scaling comparisons' };
       case '/optimizer':
-        return 'Pareto-Optimal Model Constrained Optimizer';
+        return { title: 'Constrained Pareto Optimizer', sub: 'Multi-objective model selection subject to accuracy and latency SLAs' };
       case '/carbon':
-        return 'Carbon-Aware Scheduling & Grid Emissions';
+        return { title: 'Carbon Intelligence', sub: 'Diurnal regional grid forecasting & optimal green execution window dispatch' };
       case '/hardware':
-        return 'ESP32 & INA219 Live Hardware Profiling';
+        return { title: 'Physical Hardware Telemetry', sub: 'Direct ESP32 + INA219 high-side DC current shunt measurements' };
       case '/settings':
-        return 'System Configuration & Regional Weights';
+        return { title: 'System Settings', sub: 'Regional grid emission factors, telemetry rate, and platform preferences' };
       default:
-        return 'GreenCompute AI Platform';
+        return { title: 'GreenCompute AI Platform', sub: 'Autonomous energy-aware machine learning orchestrator' };
     }
   };
+
+  const pageInfo = getPageTitle(location.pathname);
 
   return (
     <TelemetryContext.Provider
@@ -170,77 +170,85 @@ export const Layout: React.FC = () => {
         hardwareStatus,
       }}
     >
-      <div className="flex h-screen w-screen overflow-hidden bg-gray-950 text-gray-100 font-sans">
+      <div className="flex h-screen w-screen overflow-hidden bg-[#080b11] text-slate-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+        {/* Subtle Ambient Radial Lighting (Apple Pro Display Ambient Glow) */}
+        <div className="fixed top-0 left-1/4 -z-10 h-[500px] w-[500px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
+        <div className="fixed top-1/3 right-10 -z-10 h-[600px] w-[600px] rounded-full bg-cyan-500/4 blur-[140px] pointer-events-none" />
+        <div className="fixed bottom-10 left-1/3 -z-10 h-[400px] w-[400px] rounded-full bg-teal-500/4 blur-[120px] pointer-events-none" />
+
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           isWsConnected={isConnected || isSimulating}
         />
 
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Top Header */}
-          <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-800 bg-gray-950/80 px-4 lg:px-8 backdrop-blur-md">
-            <div className="flex items-center gap-3">
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          {/* Frosted Glass Top Navigation Bar */}
+          <header className="flex h-20 shrink-0 items-center justify-between border-b border-white/[0.06] glass-panel bg-[#080b11]/70 px-5 lg:px-8 z-30">
+            <div className="flex items-center gap-4 min-w-0">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white lg:hidden"
+                className="rounded-xl p-2 text-slate-400 hover:bg-white/[0.06] hover:text-white lg:hidden transition-colors"
                 aria-label="Open sidebar"
               >
                 <Menu className="h-5 w-5" />
               </button>
-              <div>
-                <h1 className="text-lg font-bold tracking-tight text-white lg:text-xl">
-                  {getPageTitle(location.pathname)}
+              <div className="min-w-0">
+                <h1 className="text-lg lg:text-xl font-bold tracking-tight text-white truncate">
+                  {pageInfo.title}
                 </h1>
-                <p className="text-xs text-gray-400 hidden sm:block">
-                  Constrained Energy-Accuracy-Latency Multi-Objective Optimization
+                <p className="text-xs text-slate-400 hidden sm:block truncate mt-0.5">
+                  {pageInfo.sub}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Live Simulator Toggle Switch */}
+            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+              {/* Live Simulator Toggle Pill (Apple Control Center style) */}
               <button
                 onClick={toggleSimulation}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all border ${
+                className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 border ${
                   isSimulating
-                    ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 shadow-sm shadow-emerald-950'
-                    : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-600'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+                    : 'glass-pill text-slate-400 hover:text-slate-200 hover:border-white/20'
                 }`}
-                title={isSimulating ? 'Click to pause simulator' : 'Click to start live telemetry simulator'}
+                title={isSimulating ? 'Pause telemetry stream' : 'Resume live stream'}
               >
                 {isSimulating ? (
                   <>
-                    <Pause className="h-3 w-3 text-emerald-400" />
-                    <span>Simulator: Active</span>
+                    <Pause className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="hidden md:inline">Simulator: 10Hz Feed</span>
+                    <span className="md:hidden">10Hz</span>
                   </>
                 ) : (
                   <>
-                    <Play className="h-3 w-3 text-gray-400" />
-                    <span>Simulator: Paused</span>
+                    <Play className="h-3.5 w-3.5 text-slate-400" />
+                    <span>Paused</span>
                   </>
                 )}
               </button>
 
               {/* Hardware Device Badge */}
-              <div className="hidden lg:flex items-center gap-1.5 rounded-full border border-gray-800 bg-gray-900/80 px-3 py-1 text-xs text-gray-300">
+              <div className="hidden xl:flex items-center gap-2 rounded-full glass-pill px-3.5 py-1.5 text-xs text-slate-300">
                 <Cpu className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="font-mono text-emerald-400">{hardwareStatus.port.split(' ')[0]}</span>
-                <span className="text-gray-500">|</span>
-                <span className="text-[11px] text-gray-400">{hardwareStatus.signal}</span>
+                <span className="font-mono text-emerald-400 font-semibold">{hardwareStatus.port.split(' ')[0]}</span>
+                <span className="text-slate-600">|</span>
+                <span className="text-[11px] text-slate-400 font-mono">{hardwareStatus.signal}</span>
               </div>
 
               {/* Regional Grid Badge */}
-              <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-gray-800 bg-gray-900/80 px-3 py-1 text-xs text-gray-300">
+              <div className="hidden sm:flex items-center gap-2 rounded-full glass-pill px-3.5 py-1.5 text-xs text-slate-300">
                 <Globe className="h-3.5 w-3.5 text-emerald-400" />
                 <span>IN-OD (Odisha)</span>
-                <span className="font-mono text-emerald-400 font-medium">0.82 kg/kWh</span>
+                <span className="font-mono text-emerald-300 font-bold bg-emerald-500/15 px-1.5 py-0.5 rounded text-[11px]">
+                  0.82 kg/kWh
+                </span>
               </div>
 
-              {/* Live Power Readout */}
-              <div className="flex items-center gap-2 rounded-full border border-emerald-900/50 bg-emerald-950/60 px-3 py-1 text-xs text-emerald-300">
+              {/* Live Power Readout Pill with Ambient Pulse */}
+              <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-gradient-to-r from-emerald-500/20 to-teal-500/15 px-3.5 py-1.5 text-xs text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.25)]">
                 <Zap className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
-                <span className="font-mono font-bold">
+                <span className="font-mono font-bold tracking-tight">
                   {activeTelemetry.power_w.toFixed(1)} W
                 </span>
               </div>
@@ -248,8 +256,10 @@ export const Layout: React.FC = () => {
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-            <Outlet />
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

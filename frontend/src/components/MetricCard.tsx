@@ -7,7 +7,7 @@ interface MetricCardProps {
   unit?: string;
   trend?: {
     value: number;
-    isPositive?: boolean; // isPositive indicates if this change is considered good (e.g. reduction in carbon is positive)
+    isPositive?: boolean;
     label?: string;
   };
   icon?: React.ReactNode;
@@ -26,46 +26,55 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 }) => {
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm transition-all hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-950/20 ${className}`}
+      className={`group relative overflow-hidden rounded-2xl glass-card p-5.5 border border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.3)] hover:border-emerald-500/40 hover:shadow-[0_12px_36px_rgba(16,185,129,0.18)] transition-all duration-300 ${className}`}
     >
+      {/* Top subtle inset highlight */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-400">{label}</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {label}
+        </span>
         {icon && (
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 text-emerald-400 border border-emerald-500/25 shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-transform duration-300 group-hover:scale-110">
             {icon}
           </div>
         )}
       </div>
 
       <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-2xl font-bold tracking-tight text-white lg:text-3xl">
+        <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono drop-shadow-sm">
           {value}
         </span>
-        {unit && <span className="text-sm font-medium text-emerald-400">{unit}</span>}
+        {unit && (
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider font-mono">
+            {unit}
+          </span>
+        )}
       </div>
 
       {(trend || subtext) && (
-        <div className="mt-3 flex items-center gap-2 text-xs">
+        <div className="mt-3.5 flex items-center gap-2 pt-3 border-t border-white/[0.05] text-xs">
           {trend && (
             <span
-              className={`inline-flex items-center gap-0.5 font-medium ${
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold border transition-colors ${
                 trend.isPositive !== false
-                  ? 'text-emerald-400'
-                  : 'text-rose-400'
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                  : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
               }`}
             >
               {trend.value > 0 ? (
-                <TrendingUp className="h-3.5 w-3.5" />
+                <TrendingUp className="h-3 w-3" />
               ) : trend.value < 0 ? (
-                <TrendingDown className="h-3.5 w-3.5" />
+                <TrendingDown className="h-3 w-3" />
               ) : (
-                <Minus className="h-3.5 w-3.5" />
+                <Minus className="h-3 w-3" />
               )}
               {Math.abs(trend.value)}%
             </span>
           )}
-          {trend?.label && <span className="text-gray-500">{trend.label}</span>}
-          {subtext && <span className="text-gray-500">{subtext}</span>}
+          {trend?.label && <span className="text-slate-400 text-[11px]">{trend.label}</span>}
+          {subtext && !trend?.label && <span className="text-slate-400 text-[11px] truncate">{subtext}</span>}
         </div>
       )}
     </div>

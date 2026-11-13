@@ -14,6 +14,8 @@ import {
   TrendingDown,
   Sun,
   Flame,
+  Sparkles,
+  Gauge,
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -95,58 +97,80 @@ export const CarbonPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white">Regional Carbon Intelligence & Dispatcher</h2>
-          <p className="text-xs text-gray-400">
-            Real-time grid marginal emissions factor tracking and carbon-aware batch dispatch
-          </p>
-        </div>
+      {/* Top Hero Glass Banner */}
+      <div className="relative overflow-hidden rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
+        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                Carbon-Aware Spatial & Temporal Dispatcher
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              Regional Grid Carbon Intelligence & Workload Shifting
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+              Dynamically schedule computational workloads during solar peak generation windows, bypassing high-emission coal baseload without hardware upgrades.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2 rounded-lg bg-gray-900 border border-gray-800 px-3 py-2 text-xs">
-          <MapPin className="h-4 w-4 text-emerald-400" />
-          <span className="text-gray-300">Active Grid Region:</span>
-          <span className="font-semibold text-white">India / Odisha State Grid (ER)</span>
+          <div className="flex items-center gap-2 rounded-2xl glass-pill px-4 py-2 border border-white/[0.08] text-xs">
+            <MapPin className="h-4 w-4 text-emerald-400" />
+            <div className="leading-tight">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Active Region</span>
+              <span className="font-semibold text-white">Odisha State Grid (ER)</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Grid Highlights */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
-          <span className="text-xs text-gray-400">Current Time & Grid CI</span>
+      {/* Grid Highlights (Apple Activity Style Cards) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="rounded-3xl glass-card p-5 border border-white/[0.08] shadow-lg relative overflow-hidden">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Current Grid CI (10:00)</span>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white font-mono">10:00 AM</span>
-            <span className="text-xs text-amber-400 font-mono">0.78 kg/kWh</span>
+            <span className="text-3xl font-extrabold text-white font-mono tracking-tight">0.78</span>
+            <span className="text-xs text-amber-400 font-mono font-semibold">kg CO₂e/kWh</span>
           </div>
-          <span className="text-[10px] text-gray-500 mt-1 block">Eastern Region thermal baseload</span>
+          <span className="text-[11px] text-slate-400 mt-2 block">Eastern Region thermal baseload</span>
         </div>
 
-        <div className="rounded-xl border border-emerald-800/60 bg-emerald-950/20 p-4">
-          <span className="text-xs text-emerald-400 font-medium">Midday Solar Window (Lowest CI)</span>
+        <div className="rounded-3xl glass-card p-5 border border-emerald-500/40 bg-gradient-to-br from-emerald-500/15 via-transparent to-transparent shadow-[0_0_30px_rgba(16,185,129,0.15)] relative overflow-hidden">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <Sun className="h-3.5 w-3.5 text-emerald-400" />
+            Midday Solar Window
+          </span>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white font-mono">0.54</span>
-            <span className="text-xs text-emerald-400 font-mono">kg CO₂e/kWh</span>
+            <span className="text-3xl font-extrabold text-emerald-300 font-mono tracking-tight">0.54</span>
+            <span className="text-xs text-emerald-400 font-mono font-semibold">kg CO₂e/kWh</span>
           </div>
-          <span className="text-[10px] text-emerald-300 mt-1 block">Peak solar generation 12:00 - 14:00</span>
+          <span className="text-[11px] text-emerald-300/80 mt-2 block">Solar peak between 11:00 - 15:00</span>
         </div>
 
-        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
-          <span className="text-xs text-gray-400">Evening Fossil Peak (Avoid)</span>
+        <div className="rounded-3xl glass-card p-5 border border-rose-500/30 shadow-lg relative overflow-hidden">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+            <Flame className="h-3.5 w-3.5 text-rose-400" />
+            Evening Fossil Peak
+          </span>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-rose-400 font-mono">0.98</span>
-            <span className="text-xs text-rose-300 font-mono">kg CO₂e/kWh</span>
+            <span className="text-3xl font-extrabold text-rose-400 font-mono tracking-tight">0.98</span>
+            <span className="text-xs text-rose-300 font-mono font-semibold">kg CO₂e/kWh</span>
           </div>
-          <span className="text-[10px] text-gray-500 mt-1 block">High coal ramp 18:00 - 21:00</span>
+          <span className="text-[11px] text-slate-400 mt-2 block">High coal ramp 18:00 - 21:00</span>
         </div>
 
-        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
-          <span className="text-xs text-gray-400">Solar Displacement Factor</span>
+        <div className="rounded-3xl glass-card p-5 border border-white/[0.08] shadow-lg relative overflow-hidden">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            Solar Displacement Delta
+          </span>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-emerald-400 font-mono">-44.9%</span>
-            <span className="text-xs text-emerald-300">Emissions</span>
+            <span className="text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">-44.9%</span>
+            <span className="text-xs text-emerald-300 font-semibold">Emissions</span>
           </div>
-          <span className="text-[10px] text-gray-500 mt-1 block">Solar vs evening peak coal</span>
+          <span className="text-[11px] text-slate-400 mt-2 block">Solar window vs evening fossil peak</span>
         </div>
       </div>
 
@@ -159,20 +183,25 @@ export const CarbonPage: React.FC = () => {
       {/* Workload Execution Scheduler & Tradeoff Card */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Scheduler Controls */}
-        <div className="lg:col-span-1 rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm space-y-4">
-          <div className="flex items-center gap-2 border-b border-gray-800 pb-3">
-            <Calendar className="h-4 w-4 text-emerald-400" />
-            <h3 className="text-sm font-semibold text-white">Workload Execution Scheduler</h3>
+        <div className="lg:col-span-1 rounded-3xl glass-card p-6 border border-white/[0.08] shadow-lg space-y-5">
+          <div className="flex items-center gap-2.5 border-b border-white/[0.06] pb-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+              <Calendar className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">Workload Timing Controller</h3>
+              <p className="text-[11px] text-slate-400">Carbon-aware batch execution dispatch</p>
+            </div>
           </div>
 
-          <p className="text-xs text-gray-400">
-            Shift flexible AI training or batch inference to the hours of cleanest solar/renewable generation.
-          </p>
-
           <div className="space-y-4 text-xs">
+            {/* Workload Duration */}
             <div>
-              <div className="flex justify-between text-gray-300 mb-1">
-                <span>Workload Duration: <strong>{durationHours} Hours</strong></span>
+              <div className="flex justify-between items-center text-slate-300 mb-2">
+                <span className="font-medium text-slate-400">Execution Duration</span>
+                <span className="rounded-full glass-pill px-2.5 py-0.5 text-emerald-300 font-mono font-bold">
+                  {durationHours} Hours
+                </span>
               </div>
               <input
                 type="range"
@@ -188,10 +217,12 @@ export const CarbonPage: React.FC = () => {
               />
             </div>
 
+            {/* Deadline Hours */}
             <div>
-              <div className="flex justify-between text-gray-300 mb-1">
-                <span>
-                  Completion Deadline: <strong>Within {deadlineHours} Hours</strong> (by {(currentHour + deadlineHours) % 24}:00)
+              <div className="flex justify-between items-center text-slate-300 mb-2">
+                <span className="font-medium text-slate-400">SLA Deadline Window</span>
+                <span className="rounded-full glass-pill px-2.5 py-0.5 text-emerald-300 font-mono font-bold">
+                  Within {deadlineHours}h (by {(currentHour + deadlineHours) % 24}:00)
                 </span>
               </div>
               <input
@@ -208,9 +239,13 @@ export const CarbonPage: React.FC = () => {
               />
             </div>
 
+            {/* Workload Energy Consumption */}
             <div>
-              <div className="flex justify-between text-gray-300 mb-1">
-                <span>Estimated Energy: <strong>{workloadEnergyKwh.toFixed(1)} kWh</strong></span>
+              <div className="flex justify-between items-center text-slate-300 mb-2">
+                <span className="font-medium text-slate-400">Batch Energy Volume</span>
+                <span className="rounded-full glass-pill px-2.5 py-0.5 text-emerald-300 font-mono font-bold">
+                  {workloadEnergyKwh.toFixed(1)} kWh
+                </span>
               </div>
               <input
                 type="range"
@@ -228,7 +263,7 @@ export const CarbonPage: React.FC = () => {
 
             <button
               onClick={handleDispatchSchedule}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 py-2.5 text-xs font-semibold text-white shadow-md shadow-emerald-900/30 hover:bg-emerald-500 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
             >
               {scheduled ? (
                 <>
@@ -238,7 +273,7 @@ export const CarbonPage: React.FC = () => {
               ) : (
                 <>
                   Dispatch to Carbon-Aware Scheduler
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
@@ -249,88 +284,92 @@ export const CarbonPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Immediate Window (Coal Peak) */}
-            <div className="rounded-xl border border-rose-900/40 bg-gray-900/70 p-5 relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-2 mb-3">
+            <div className="rounded-3xl glass-card p-5 border border-rose-500/20 shadow-lg relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-rose-500/20 pb-3 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
                   <Flame className="h-4 w-4 text-rose-400" />
-                  Immediate Execution (10:00 AM)
+                  Default Immediate Run (10:00)
                 </span>
-                <span className="text-[10px] font-mono text-gray-400">Default Run</span>
+                <span className="text-[10px] font-mono text-slate-400 glass-pill px-2.5 py-0.5 rounded-full">
+                  Unscheduled
+                </span>
               </div>
 
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-gray-300">
-                  <span>Execution Time:</span>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400">Execution Window:</span>
                   <span className="font-mono text-white font-bold">{immediateWindow.timeString}</span>
                 </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Average Grid Intensity:</span>
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400">Average Grid CI:</span>
                   <span className="font-mono text-rose-400 font-bold">{immediateWindow.avgCI.toFixed(2)} kg/kWh</span>
                 </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Total Carbon Emissions:</span>
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400">Carbon Footprint:</span>
                   <span className="font-mono text-rose-400 text-sm font-bold">
                     {immediateWindow.emissionsKg.toFixed(2)} kg CO₂e
                   </span>
                 </div>
-                <div className="pt-2 text-[11px] text-gray-500 border-t border-gray-800">
-                  High reliance on Odisha coal thermal generation; zero solar displacement.
+                <div className="pt-2 text-[11px] text-slate-400 border-t border-white/[0.05]">
+                  High dependence on coal baseload; zero renewable displacement.
                 </div>
               </div>
             </div>
 
             {/* Optimal Green Window (Solar Peak) */}
-            <div className="rounded-xl border-2 border-emerald-500 bg-gradient-to-br from-emerald-950/60 via-gray-900/80 to-gray-950 p-5 shadow-lg shadow-emerald-950/30 relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-emerald-800/60 pb-2 mb-3">
+            <div className="rounded-3xl glass-card p-5 border-2 border-emerald-500/80 bg-gradient-to-br from-emerald-500/15 via-teal-500/5 to-transparent shadow-[0_0_30px_rgba(16,185,129,0.2)] relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                   <Sun className="h-4 w-4 text-emerald-400" />
-                  OPTIMAL GREEN WINDOW
+                  Optimal Green Window
                 </span>
-                <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
-                  Solar Peak
+                <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-bold">
+                  Solar Influx
                 </span>
               </div>
 
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-gray-300">
-                  <span>Scheduled Time:</span>
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400">Scheduled Window:</span>
                   <span className="font-mono text-white font-bold">{optimalWindow.timeString}</span>
                 </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Average Grid Intensity:</span>
-                  <span className="font-mono text-emerald-400 font-bold">{optimalWindow.avgCI.toFixed(2)} kg/kWh</span>
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400">Average Grid CI:</span>
+                  <span className="font-mono text-emerald-300 font-bold">{optimalWindow.avgCI.toFixed(2)} kg/kWh</span>
                 </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Total Carbon Emissions:</span>
+                <div className="flex justify-between text-slate-300">
+                  <span className="text-slate-400">Carbon Footprint:</span>
                   <span className="font-mono text-emerald-300 text-sm font-bold">
                     {optimalWindow.emissionsKg.toFixed(2)} kg CO₂e
                   </span>
                 </div>
-                <div className="pt-2 text-[11px] text-emerald-300 border-t border-emerald-800/40 font-medium">
-                  Displaces grid energy with local solar influx; strictly meets deadline by {(currentHour + deadlineHours) % 24}:00.
+                <div className="pt-2 text-[11px] text-emerald-300 border-t border-emerald-500/20 font-medium">
+                  Maximizes regional solar utilization; strictly satisfies completion SLA.
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Net Carbon Avoided Banner */}
-          <div className="rounded-xl border border-emerald-800/60 bg-emerald-950/30 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
+          {/* Net Carbon Avoided Banner (Apple Environmental Report Style) */}
+          <div className="rounded-3xl glass-card p-6 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
                 <Leaf className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs text-gray-400 block">Total Carbon Avoided by Temporal Shifting</span>
-                <span className="text-2xl font-extrabold text-white font-mono">
-                  {co2AvoidedKg.toFixed(2)} kg CO₂e{' '}
+                <span className="text-xs text-slate-300 font-medium block">Net Avoided Emissions by Temporal Shifting</span>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="text-3xl font-extrabold text-white font-mono tracking-tight">
+                    {co2AvoidedKg.toFixed(2)} kg CO₂e
+                  </span>
                   <span className="text-emerald-400 text-lg font-bold">(-{co2SavingsPct}%)</span>
-                </span>
+                </div>
               </div>
             </div>
 
-            <div className="text-right text-xs text-gray-400">
-              <span>Savings achieved purely through</span>
-              <span className="block text-emerald-400 font-semibold">Zero-Hardware Temporal Load Shifting</span>
+            <div className="text-left sm:text-right text-xs">
+              <span className="text-slate-400 block">Reduction achieved via</span>
+              <span className="text-emerald-400 font-bold text-sm">Autonomous Temporal Load Balancing</span>
             </div>
           </div>
 

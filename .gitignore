@@ -58,3 +58,9 @@ data/
 
 # OS
 Thumbs.db
+
+# Tool caches & memory
+.serena/
+.enterprise_memory/
+graphify-out/
+

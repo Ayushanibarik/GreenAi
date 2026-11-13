@@ -9,6 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { Cpu, Activity } from 'lucide-react';
 import type { HardwareReading } from '../types';
 
 interface HardwareTelemetryChartProps {
@@ -42,82 +43,83 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
     energy_wh: Number((p.energy_mwh / 1000).toFixed(3)),
   }));
 
+  const channels = [
+    { id: 'all', label: 'All 4 Channels' },
+    { id: 'power', label: 'Power (W)' },
+    { id: 'current', label: 'Current (mA)' },
+    { id: 'voltage', label: 'Voltage (V)' },
+    { id: 'energy', label: 'Energy (Wh)' },
+  ] as const;
+
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)] relative overflow-hidden">
+      {/* Background ambient glow */}
+      <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+
+      <div className="relative mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h3 className="text-sm font-semibold text-white">{title}</h3>
-          <p className="text-xs text-gray-400">Direct hardware shunt sensor telemetry: V, I, P, E</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+              Hardware Oscilloscope Channel
+            </span>
+          </div>
+          <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Physical current shunt telemetry sampled at 10Hz · Precision ±0.1% FS
+          </p>
         </div>
 
-        {/* Channel filter tabs */}
-        <div className="flex flex-wrap items-center gap-1 rounded-lg bg-gray-950 p-1 border border-gray-800 text-[11px]">
-          <button
-            onClick={() => setSelectedChannel('all')}
-            className={`px-2.5 py-1 rounded font-medium transition-colors ${
-              selectedChannel === 'all'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            All 4 Channels
-          </button>
-          <button
-            onClick={() => setSelectedChannel('power')}
-            className={`px-2.5 py-1 rounded font-medium transition-colors ${
-              selectedChannel === 'power'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Power (W)
-          </button>
-          <button
-            onClick={() => setSelectedChannel('current')}
-            className={`px-2.5 py-1 rounded font-medium transition-colors ${
-              selectedChannel === 'current'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Current (mA)
-          </button>
-          <button
-            onClick={() => setSelectedChannel('voltage')}
-            className={`px-2.5 py-1 rounded font-medium transition-colors ${
-              selectedChannel === 'voltage'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Voltage (V)
-          </button>
-          <button
-            onClick={() => setSelectedChannel('energy')}
-            className={`px-2.5 py-1 rounded font-medium transition-colors ${
-              selectedChannel === 'energy'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Energy (Wh)
-          </button>
+        {/* Channel Segmented Control (Apple Glass Pills) */}
+        <div className="flex flex-wrap items-center gap-1 rounded-2xl glass-pill p-1 border border-white/[0.08] text-xs">
+          {channels.map((ch) => {
+            const active = selectedChannel === ch.id;
+            return (
+              <button
+                key={ch.id}
+                onClick={() => setSelectedChannel(ch.id)}
+                className={`rounded-xl px-3 py-1.5 font-semibold transition-all duration-200 cursor-pointer ${
+                  active
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-950/60'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {ch.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" vertical={false} />
-            <XAxis dataKey="time" stroke="#6B7280" tick={{ fill: '#9CA3AF', fontSize: 11 }} />
-            
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.04)" vertical={false} />
+            <XAxis
+              dataKey="time"
+              stroke="#64748b"
+              tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
+              axisLine={false}
+              tickLine={false}
+            />
+
             {/* Primary Left YAxis: Power or Current */}
             <YAxis
               yAxisId="primary"
               stroke="#10B981"
-              tick={{ fill: '#34D399', fontSize: 11 }}
-              unit={selectedChannel === 'current' ? ' mA' : selectedChannel === 'voltage' ? ' V' : selectedChannel === 'energy' ? ' Wh' : ' W'}
+              tick={{ fill: '#34D399', fontSize: 10, fontFamily: 'monospace' }}
+              unit={
+                selectedChannel === 'current'
+                  ? ' mA'
+                  : selectedChannel === 'voltage'
+                  ? ' V'
+                  : selectedChannel === 'energy'
+                  ? ' Wh'
+                  : ' W'
+              }
               domain={selectedChannel === 'voltage' ? [11.8, 12.2] : ['auto', 'auto']}
+              axisLine={false}
+              tickLine={false}
             />
 
             {/* Secondary Right YAxis for Multi-channel view */}
@@ -125,24 +127,29 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
               <YAxis
                 yAxisId="secondary"
                 orientation="right"
-                stroke="#6EE7B7"
-                tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                stroke="#38BDF8"
+                tick={{ fill: '#7dd3fc', fontSize: 10, fontFamily: 'monospace' }}
                 unit=" mA"
+                axisLine={false}
+                tickLine={false}
               />
             )}
 
             <Tooltip
               contentStyle={{
-                backgroundColor: '#111827',
-                borderColor: '#374151',
-                borderRadius: '0.5rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                backdropFilter: 'blur(16px)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '1rem',
                 fontSize: '12px',
-                color: '#F9FAFB',
+                color: '#F8FAFC',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
+                padding: '10px 14px',
               }}
             />
             <Legend
-              wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
-              formatter={(value) => <span className="text-gray-300 capitalize">{value}</span>}
+              wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+              formatter={(value) => <span className="text-slate-300 font-medium capitalize">{value}</span>}
             />
 
             {(selectedChannel === 'all' || selectedChannel === 'power') && (
@@ -152,9 +159,9 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 dataKey="power_w"
                 name="Power Draw (W)"
                 stroke="#10B981"
-                strokeWidth={2.5}
+                strokeWidth={3}
                 dot={false}
-                activeDot={{ r: 4, fill: '#34D399' }}
+                activeDot={{ r: 5, fill: '#34D399', stroke: '#064e3b', strokeWidth: 2 }}
               />
             )}
 
@@ -164,9 +171,10 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 type="monotone"
                 dataKey="current_ma"
                 name="Current (mA)"
-                stroke="#3B82F6"
-                strokeWidth={2}
+                stroke="#38BDF8"
+                strokeWidth={2.5}
                 dot={false}
+                activeDot={{ r: 5, fill: '#38BDF8' }}
               />
             )}
 
@@ -176,8 +184,8 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 type="monotone"
                 dataKey="voltage_v"
                 name="Bus Voltage (V)"
-                stroke="#F59E0B"
-                strokeWidth={1.5}
+                stroke="#FBBF24"
+                strokeWidth={2}
                 strokeDasharray="4 4"
                 dot={false}
               />
@@ -189,8 +197,8 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 type="monotone"
                 dataKey="energy_wh"
                 name="Accumulated Energy (Wh)"
-                stroke="#A7F3D0"
-                strokeWidth={2}
+                stroke="#A78BFA"
+                strokeWidth={2.5}
                 dot={false}
               />
             )}

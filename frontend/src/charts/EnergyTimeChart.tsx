@@ -7,7 +7,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts';
 
 interface EnergyDataPoint {
@@ -39,23 +38,25 @@ interface EnergyTimeChartProps {
 
 export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
   data = defaultData,
-  title = 'Energy Consumption Profile: Baseline vs. Optimized (Watts)',
+  title = 'Energy Consumption Profile: Baseline vs. Optimized',
 }) => {
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg shadow-black/40">
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-white">{title}</h3>
-          <p className="text-xs text-gray-400">Comparing unoptimized FP32 baseline against INT8/ONNX pipeline</p>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-white">{title}</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Empirical power draw comparison: FP32 Baseline vs. INT8/ONNX Accelerated Runtime
+          </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5 text-gray-400">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-            Optimized
+          <span className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-emerald-300 font-medium">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+            Optimized (INT8/ONNX)
           </span>
-          <span className="flex items-center gap-1.5 text-gray-400">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-800" />
-            Baseline
+          <span className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-slate-400 font-medium">
+            <span className="h-2 w-2 rounded-full bg-slate-500" />
+            Baseline (FP32)
           </span>
         </div>
       </div>
@@ -64,50 +65,51 @@ export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
-              <linearGradient id="colorOptimized" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
+              <linearGradient id="appleColorOptimized" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="5%" stopColor="#10B981" stopOpacity={0.45} />
                 <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
               </linearGradient>
-              <linearGradient id="colorBaseline" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="5%" stopColor="#047857" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#047857" stopOpacity={0.0} />
+              <linearGradient id="appleColorBaseline" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#64748b" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" vertical={false} />
-            <XAxis dataKey="time" stroke="#6B7280" tick={{ fill: '#9CA3AF', fontSize: 11 }} />
-            <YAxis stroke="#6B7280" tick={{ fill: '#9CA3AF', fontSize: 11 }} unit="W" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
+            <XAxis dataKey="time" stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }} />
+            <YAxis stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }} unit="W" />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#111827',
-                borderColor: '#374151',
-                borderRadius: '0.5rem',
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderColor: 'rgba(255, 255, 255, 0.12)',
+                borderRadius: '16px',
+                boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
                 fontSize: '12px',
-                color: '#F9FAFB',
+                color: '#f8fafc',
+                padding: '10px 14px',
               }}
-            />
-            <Legend
-              wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }}
-              formatter={(value) => (
-                <span className="text-gray-300 capitalize">{value.replace('_', ' ')}</span>
-              )}
+              itemStyle={{ color: '#34d399', fontWeight: 600 }}
+              labelStyle={{ color: '#94a3b8', marginBottom: '4px', fontWeight: 500 }}
+              formatter={(val: number) => [`${val} W`, 'Power Draw']}
             />
             <Area
               type="monotone"
               dataKey="baseline_power"
-              name="Baseline (FP32)"
-              stroke="#047857"
+              name="Baseline FP32"
+              stroke="#64748b"
               strokeWidth={2}
               fillOpacity={1}
-              fill="url(#colorBaseline)"
+              fill="url(#appleColorBaseline)"
             />
             <Area
               type="monotone"
               dataKey="optimized_power"
-              name="Optimized (INT8/ONNX)"
-              stroke="#10B981"
+              name="Optimized INT8"
+              stroke="#10b981"
               strokeWidth={2.5}
               fillOpacity={1}
-              fill="url(#colorOptimized)"
+              fill="url(#appleColorOptimized)"
             />
           </AreaChart>
         </ResponsiveContainer>

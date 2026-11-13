@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Sun, Moon, Info } from 'lucide-react';
+import { Calendar, Sun, Moon, Sparkles, Zap } from 'lucide-react';
 
 interface HourSlot {
   hour: number;
@@ -11,12 +11,6 @@ interface HourSlot {
 
 const generate24hProfile = (): HourSlot[] => {
   const slots: HourSlot[] = [];
-  // Typical Indian / regional grid profile:
-  // Night (0-5h): Moderate coal/wind base ~0.78
-  // Morning peak (6-9h): High demand ~0.88 - 0.92
-  // Solar peak (10-15h): High solar penetration, lowest intensity ~0.55 - 0.68
-  // Evening peak (17-21h): Highest fossil peak ~0.94 - 0.98
-  // Late night (22-23h): Drop ~0.75
   const baseProfile = [
     0.74, 0.72, 0.70, 0.69, 0.72, 0.81,
     0.89, 0.92, 0.86, 0.73, 0.62, 0.56,
@@ -52,38 +46,56 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
 }) => {
   const [selectedSlot, setSelectedSlot] = useState<HourSlot | null>(slots[12]);
 
-  const getColor = (status: HourSlot['status']) => {
+  const getColor = (status: HourSlot['status'], isSelected: boolean) => {
+    if (isSelected) {
+      switch (status) {
+        case 'optimal':
+          return 'bg-emerald-500 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.5)] border-emerald-300 scale-105';
+        case 'moderate':
+          return 'bg-teal-500 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.5)] border-teal-300 scale-105';
+        case 'peak':
+          return 'bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.5)] border-rose-300 scale-105';
+      }
+    }
+
     switch (status) {
       case 'optimal':
-        return 'bg-emerald-500/80 border-emerald-400 text-emerald-950 hover:bg-emerald-400';
+        return 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30';
       case 'moderate':
-        return 'bg-emerald-900/60 border-emerald-700/50 text-emerald-200 hover:bg-emerald-800/80';
+        return 'bg-white/[0.04] border-white/[0.08] text-slate-300 hover:bg-white/[0.08]';
       case 'peak':
-        return 'bg-rose-950/60 border-rose-800/50 text-rose-300 hover:bg-rose-900/80';
+        return 'bg-rose-500/15 border-rose-500/30 text-rose-300 hover:bg-rose-500/25';
     }
   };
 
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-5 backdrop-blur-sm">
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)] relative overflow-hidden">
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-emerald-400" />
-          <h3 className="text-sm font-semibold text-white">
-            24-Hour Carbon Intensity & Green Scheduling Window
-          </h3>
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+            <Calendar className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white tracking-tight">
+              24-Hour Carbon Dispatch Matrix
+            </h3>
+            <p className="text-[11px] text-slate-400">Click any hour to preview grid renewable ratio</p>
+          </div>
         </div>
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-xs bg-emerald-500 border border-emerald-400" />
-            <span className="text-gray-300">Optimal (Solar Peak)</span>
+
+        {/* Legend Chips */}
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-emerald-300 border border-emerald-500/30">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span>Optimal (Solar Peak)</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-xs bg-emerald-900 border border-emerald-700" />
-            <span className="text-gray-300">Moderate</span>
+          <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-slate-400 border border-white/[0.06]">
+            <span className="h-2 w-2 rounded-full bg-slate-500" />
+            <span>Moderate</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-xs bg-rose-950 border border-rose-800" />
-            <span className="text-gray-300">Grid Peak (Avoid)</span>
+          <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-rose-300 border border-rose-500/30">
+            <span className="h-2 w-2 rounded-full bg-rose-400" />
+            <span>Grid Peak (Avoid)</span>
           </div>
         </div>
       </div>
@@ -96,46 +108,63 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
             <button
               key={slot.hour}
               onClick={() => setSelectedSlot(slot)}
-              className={`flex flex-col items-center justify-center rounded-lg border p-2 text-center transition-all cursor-pointer ${getColor(
-                slot.status
-              )} ${isSelected ? 'ring-2 ring-emerald-300 scale-105' : ''}`}
+              className={`flex flex-col items-center justify-center rounded-xl border p-2 text-center transition-all duration-200 cursor-pointer ${getColor(
+                slot.status,
+                isSelected
+              )}`}
             >
-              <span className="text-[10px] font-mono font-medium">{slot.label}</span>
-              <span className="text-xs font-bold font-mono mt-1">{slot.intensity.toFixed(2)}</span>
+              <span className="text-[9px] font-mono opacity-80">{slot.label.split(':')[0]}h</span>
+              <span className="text-xs font-bold font-mono mt-0.5">{slot.intensity.toFixed(2)}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Detail card for selected hour */}
+      {/* Detail card for selected hour (Apple Inspector Card) */}
       {selectedSlot && (
-        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg bg-gray-950/70 p-3.5 border border-gray-800 text-xs">
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl glass-pill p-4 border border-white/[0.08] text-xs">
           <div className="flex items-center gap-3">
-            {selectedSlot.hour >= 6 && selectedSlot.hour <= 18 ? (
-              <Sun className="h-5 w-5 text-amber-400" />
-            ) : (
-              <Moon className="h-5 w-5 text-indigo-400" />
-            )}
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] border border-white/10 shrink-0">
+              {selectedSlot.hour >= 6 && selectedSlot.hour <= 17 ? (
+                <Sun className="h-5 w-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+              ) : (
+                <Moon className="h-5 w-5 text-indigo-400" />
+              )}
+            </div>
             <div>
-              <span className="font-semibold text-white">Window {selectedSlot.label}</span>
-              <span className="ml-2 text-gray-400">
-                Grid Carbon Intensity: <strong className="text-emerald-400">{selectedSlot.intensity.toFixed(2)} kg CO₂e/kWh</strong>
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white text-sm">Window {selectedSlot.label}</span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    selectedSlot.status === 'optimal'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : selectedSlot.status === 'peak'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                      : 'bg-white/10 text-slate-300 border border-white/10'
+                  }`}
+                >
+                  {selectedSlot.status === 'optimal' ? 'Best Green Window' : selectedSlot.status}
+                </span>
+              </div>
+              <p className="text-slate-400 text-[11px] mt-0.5">
+                Marginal Grid Intensity:{' '}
+                <strong className="text-white font-mono">{selectedSlot.intensity.toFixed(2)} kg CO₂e / kWh</strong>
+              </p>
             </div>
           </div>
-          <div className="mt-2 sm:mt-0 flex items-center gap-3">
-            <span className="text-gray-400">Renewable Mix: <strong className="text-white">{selectedSlot.renewablePct}%</strong></span>
-            <span
-              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                selectedSlot.status === 'optimal'
-                  ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                  : selectedSlot.status === 'peak'
-                  ? 'bg-rose-950 text-rose-400 border border-rose-800'
-                  : 'bg-gray-800 text-gray-300'
-              }`}
-            >
-              {selectedSlot.status === 'optimal' ? 'Best Green Window' : selectedSlot.status}
-            </span>
+
+          <div className="mt-3 sm:mt-0 flex items-center gap-4">
+            <div className="text-right">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Renewable Mix</span>
+              <span className="font-mono text-emerald-400 font-bold text-base">{selectedSlot.renewablePct}%</span>
+            </div>
+            <div className="h-8 w-px bg-white/[0.08]" />
+            <div className="text-right">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Carbon Tariff</span>
+              <span className="font-mono text-slate-200 font-semibold text-sm">
+                {selectedSlot.status === 'optimal' ? 'Lowest' : selectedSlot.status === 'peak' ? 'Peak +40%' : 'Standard'}
+              </span>
+            </div>
           </div>
         </div>
       )}
