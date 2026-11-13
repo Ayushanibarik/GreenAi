@@ -83,6 +83,7 @@ class ConnectionManager:
                     "gpu_percent": round(snapshot.gpu_percent, 2),
                     "gpu_power_w": round(snapshot.gpu_power_w, 2),
                     "ram_used_mb": round(snapshot.ram_used_mb, 2),
+                    "power_w": round(active_power, 2),
                     "system_power_w": round(snapshot.power_w, 2),
                     "hardware_power_w": round(hw_power, 2) if hw_power is not None else None,
                     "hardware_voltage_v": round(hw_voltage, 2) if hw_voltage is not None else None,
