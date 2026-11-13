@@ -198,6 +198,7 @@ def run_benchmark(
     batch_size: int = 64,
     data_dir: str = "./data",
     output_dir: str = "benchmarks/reports",
+    synthetic: bool = False,
 ) -> dict:
     """Run a full benchmark and return the results dict."""
     device = _get_device()
@@ -205,7 +206,7 @@ def run_benchmark(
     out_path.mkdir(parents=True, exist_ok=True)
 
     # ── Dataset ───────────────────────────────────────────────────────────
-    test_ds = get_cifar10_test_dataset(data_dir=data_dir, max_samples=num_samples)
+    test_ds = get_cifar10_test_dataset(data_dir=data_dir, max_samples=num_samples, force_synthetic=synthetic)
     loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=0)
 
     # ── Model ─────────────────────────────────────────────────────────────
@@ -338,6 +339,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--repeats", type=int, default=3, help="Number of repeat runs")
     p.add_argument("--batch-size", type=int, default=64)
     p.add_argument("--data-dir", default="./data", help="CIFAR-10 data directory")
+    p.add_argument("--synthetic", action="store_true", help="Use synthetic dataset (avoids downloading CIFAR-10)")
     p.add_argument("--output", default="benchmarks/reports/", help="Output directory for JSON results")
     return p.parse_args()
 
@@ -349,6 +351,7 @@ def main() -> None:
     print(f"   Precision : {args.precision}")
     print(f"   Samples   : {args.samples}")
     print(f"   Repeats   : {args.repeats}")
+    print(f"   Synthetic : {args.synthetic}")
     print(f"   Device    : {'cuda' if torch.cuda.is_available() else 'cpu'}")
     print(f"   CodeCarbon: {'yes' if HAS_CODECARBON else 'no (install codecarbon)'}")
     print()
@@ -361,6 +364,7 @@ def main() -> None:
         batch_size=args.batch_size,
         data_dir=args.data_dir,
         output_dir=args.output,
+        synthetic=args.synthetic,
     )
 
 
