@@ -51,6 +51,10 @@ data/
 *.zip
 
 # Models & binaries
+*.onnx
+*.onnx.data
+*.pth
+*.pt
 
 # OS
 Thumbs.db
