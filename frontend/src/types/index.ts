@@ -65,5 +65,10 @@ export interface TelemetryPayload {
   ram_percent: number;
   power_w: number;
   energy_wh: number;
+  voltage_v?: number;
+  current_ma?: number;
+  power_mw?: number;
+  energy_mwh?: number;
   timestamp: string;
 }
+
