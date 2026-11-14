@@ -2,6 +2,7 @@ import React from 'react';
 import HardwareTelemetryChart from '../charts/HardwareTelemetryChart';
 import { Activity, Zap, ShieldCheck, Cpu, HardDrive, Pause, Play, Info } from 'lucide-react';
 import { useTelemetry } from '../context/TelemetryContext';
+import { mwToW } from '../utils/format';
 
 export const HardwarePage: React.FC = () => {
   const { data: telemetry, hardwareHistory, connectionStatus, isPaused, togglePause } = useTelemetry();
@@ -92,7 +93,7 @@ export const HardwarePage: React.FC = () => {
             <span className="uppercase text-[10px] font-semibold tracking-wider">Power</span>
             <Zap className="h-3.5 w-3.5 text-emerald-500" />
           </div>
-          <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">{(latest.power_mw / 1000).toFixed(2)}</span>
+          <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">{mwToW(latest.power_mw).toFixed(2)}</span>
           <span className="ml-1 text-xs text-[var(--text-muted)] font-mono">W</span>
         </div>
 
@@ -101,7 +102,7 @@ export const HardwarePage: React.FC = () => {
             <span className="uppercase text-[10px] font-semibold tracking-wider">Energy</span>
             <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
           </div>
-          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono">{(latest.energy_mwh / 1000).toFixed(2)}</span>
+          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono">{mwToW(latest.energy_mwh).toFixed(2)}</span>
           <span className="ml-1 text-xs text-[var(--text-muted)] font-mono">Wh</span>
         </div>
       </div>

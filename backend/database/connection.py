@@ -55,7 +55,6 @@ async def init_db() -> None:
     global engine, async_session_factory
 
     try:
-        # Test connection
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
             await conn.run_sync(Base.metadata.create_all)

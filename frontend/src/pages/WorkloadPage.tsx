@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import { PlusCircle, Search, Filter, Layers, RefreshCw, Download, Inbox, RotateCcw } from 'lucide-react';
 import api from '../services/api';
 import type { Workload } from '../types';
+import { formatWh, formatCO2, formatLatency } from '../utils/format';
 
 const fallbackWorkloads: Workload[] = [
   {
@@ -345,13 +346,13 @@ export const WorkloadPage: React.FC = () => {
                       <StatusBadge status={wl.status} />
                     </td>
                     <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
-                      {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
+                      {wl.energy_wh ? formatWh(wl.energy_wh) : '—'}
                     </td>
                     <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
-                      {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
+                      {wl.carbon_g ? formatCO2(wl.carbon_g) : '—'}
                     </td>
                     <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
-                      {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
+                      {wl.latency_ms ? formatLatency(wl.latency_ms) : '—'}
                     </td>
                     <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
                       {wl.accuracy ? `${wl.accuracy.toFixed(1)}%` : '—'}

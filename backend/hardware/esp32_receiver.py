@@ -87,11 +87,10 @@ class ESP32DataReceiver:
         if record["power"] > self.peak_power:
             self.peak_power = record["power"]
 
-        # Track cumulative energy
         if record["energy"] > self.total_energy_wh:
             self.total_energy_wh = record["energy"]
         elif len(self.buffer) >= 2:
-            # Trapezoidal integration if device resets energy counter
+            # Trapezoidal integration if hardware resets its internal energy counter
             prev = self.buffer[-2]
             try:
                 t1 = datetime.fromisoformat(prev["timestamp"])

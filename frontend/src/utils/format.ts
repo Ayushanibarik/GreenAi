@@ -23,6 +23,11 @@ export function formatLatency(ms: number): string {
   return `${ms.toFixed(0)} ms`;
 }
 
+export function formatPower(w: number): string {
+  if (w >= 1000) return `${(w / 1000).toFixed(2)} kW`;
+  return `${w.toFixed(1)} W`;
+}
+
 export function formatTimestamp(iso: string): string {
   return new Date(iso).toLocaleString();
 }

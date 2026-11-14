@@ -18,6 +18,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatWh, formatCO2, formatLatency } from '../utils/format';
 
 export const Dashboard: React.FC = () => {
   const { data: telemetry, connectionStatus } = useTelemetry();
@@ -233,13 +234,13 @@ export const Dashboard: React.FC = () => {
                     <StatusBadge status={wl.status} />
                   </td>
                   <td className="font-mono font-medium text-[var(--text-primary)]">
-                    {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
+                    {wl.energy_wh ? formatWh(wl.energy_wh) : '—'}
                   </td>
                   <td className="font-mono text-[var(--text-muted)]">
-                    {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
+                    {wl.carbon_g ? formatCO2(wl.carbon_g) : '—'}
                   </td>
                   <td className="font-mono text-[var(--text-muted)]">
-                    {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
+                    {wl.latency_ms ? formatLatency(wl.latency_ms) : '—'}
                   </td>
                   <td className="text-right text-[var(--text-muted)] text-[11px] font-mono">
                     {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -114,7 +114,6 @@ class ModelOptimizer:
             accuracy = eval_fn(model_or_path)
             mem = model_size_mb(model_or_path)
 
-        # Average latency over n_runs
         latencies: list[float] = []
         for _ in range(n_runs):
             t0 = time.perf_counter()
@@ -122,7 +121,6 @@ class ModelOptimizer:
             latencies.append((time.perf_counter() - t0) * 1000)
         avg_latency = sum(latencies) / len(latencies)
 
-        # Energy via profiler (single run)
         snap = self.profiler.profile(_run)
         energy_wh = snap.energy_wh
         co2e_g = energy_wh * self.carbon_intensity * 1000  # kgCO2/kWh → g
@@ -163,7 +161,6 @@ class ModelOptimizer:
             except Exception:
                 continue
 
-            # Constraint validation
             if res.accuracy < accuracy_min:
                 res.feasible = False
             if res.latency_ms > latency_max_ms:
@@ -173,7 +170,6 @@ class ModelOptimizer:
 
             results.append(res)
 
-        # Sort: feasible first, then by ascending energy × carbon_intensity
         results.sort(
             key=lambda r: (
                 not r.feasible,

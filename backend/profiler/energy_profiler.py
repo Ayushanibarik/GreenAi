@@ -51,16 +51,20 @@ class EnergyProfiler:
         default=None, init=False, repr=False
     )
     _gpu_initialised: bool = field(default=False, init=False)
+    _gpu_init_attempted: bool = field(default=False, init=False)
 
     # ── GPU helpers ──────────────────────────────────────────────────────
 
     def _init_gpu(self) -> None:
+        if self._gpu_init_attempted:
+            return
+        self._gpu_init_attempted = True
         if _NVML_AVAILABLE and not self._gpu_initialised:
             try:
                 pynvml.nvmlInit()
                 self._gpu_initialised = True
             except Exception:
-                pass
+                self._gpu_initialised = False
 
     def _gpu_utilisation(self) -> float:
         if not self._gpu_initialised:
