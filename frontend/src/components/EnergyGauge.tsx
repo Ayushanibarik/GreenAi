@@ -20,24 +20,24 @@ export const EnergyGauge: React.FC<EnergyGaugeProps> = ({
   const strokeDashoffset = arcLength - (arcLength * percentage) / 100;
 
   return (
-    <div className="flex min-h-[330px] flex-col items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
+    <div className="flex min-h-[310px] flex-col items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
       <div className="mb-2 flex w-full items-center justify-between border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--accent-primary)]">
             <Zap className="h-4 w-4" />
           </div>
           <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-            Active Power Draw
+            Power Draw
           </span>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Live Telemetry
+          Live
         </span>
       </div>
 
       <div className="relative my-auto flex items-center justify-center">
-        <svg className="h-52 w-52 -rotate-[210deg] transform" viewBox="0 0 200 200">
+        <svg className="h-50 w-50 -rotate-[210deg] transform" viewBox="0 0 200 200">
           <defs>
             <linearGradient id="scientificEnergyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#38bdf8" />
@@ -46,7 +46,7 @@ export const EnergyGauge: React.FC<EnergyGaugeProps> = ({
             </linearGradient>
           </defs>
 
-          {/* Background Track (uses theme-aware subtle border/track) */}
+          {/* Background Track */}
           <circle
             cx="100"
             cy="100"
@@ -78,19 +78,16 @@ export const EnergyGauge: React.FC<EnergyGaugeProps> = ({
           <span className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums">
             {currentPower.toFixed(1)}
           </span>
-          <span className="mt-0.5 text-xs font-semibold tracking-widest text-[var(--accent-primary)]">
-            WATTS
-          </span>
-          <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
-            Instantaneous Load
+          <span className="mt-0.5 text-xs font-semibold tracking-widest text-[var(--accent-primary)] font-mono">
+            W
           </span>
         </div>
       </div>
 
-      <div className="flex w-full items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-4 py-2.5 text-xs">
-        <span className="text-[var(--text-muted)] font-medium">Headroom ({maxPower}W Max)</span>
+      <div className="flex w-full items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-xs">
+        <span className="text-[var(--text-muted)] font-mono text-[11px]">Max {maxPower}W</span>
         <span className="font-mono font-semibold text-[var(--text-primary)]">
-          {percentage.toFixed(0)}% Capacity
+          {percentage.toFixed(0)}%
         </span>
       </div>
     </div>

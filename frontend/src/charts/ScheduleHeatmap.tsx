@@ -4,7 +4,7 @@ import { Calendar, Sun, Moon } from 'lucide-react';
 interface HourSlot {
   hour: number;
   label: string;
-  intensity: number; // kg CO2 / kWh
+  intensity: number;
   status: 'optimal' | 'moderate' | 'peak';
   renewablePct: number;
 }
@@ -69,46 +69,43 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
   };
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-5 shadow-sm transition-colors duration-200">
+      <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--accent-primary)]">
             <Calendar className="h-4 w-4" />
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-tight">
-              24-Hour Dispatch Heatmap (Marginal Carbon Intensity)
-            </h3>
-            <p className="text-[11px] text-[var(--text-muted)]">Select an hourly window to inspect grid conditions and optimal dispatch</p>
-          </div>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-tight">
+            24-Hour Dispatch Heatmap
+          </h3>
         </div>
 
-        {/* Legend Indicators */}
+        {/* Legend */}
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-400 font-medium">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span>Optimal Window (Solar Peak)</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-400 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span>Optimal</span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-0.5 text-[var(--text-muted)] font-medium">
-            <span className="h-2 w-2 rounded-full bg-slate-400" />
-            <span>Nominal Dispatch</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2 py-0.5 text-[var(--text-muted)] font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            <span>Moderate</span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 text-rose-700 dark:text-rose-400 font-medium">
-            <span className="h-2 w-2 rounded-full bg-rose-500" />
-            <span>Peak Thermal Peaker</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-rose-700 dark:text-rose-400 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+            <span>Peak</span>
           </div>
         </div>
       </div>
 
       {/* Grid of 24 Hours */}
-      <div className="grid grid-cols-6 sm:grid-cols-12 md:grid-cols-24 gap-1.5 py-2">
+      <div className="grid grid-cols-6 sm:grid-cols-12 md:grid-cols-24 gap-1.5 py-1.5">
         {slots.map((slot) => {
           const isSelected = selectedSlot?.hour === slot.hour;
           return (
             <button
               key={slot.hour}
               onClick={() => setSelectedSlot(slot)}
-              className={`flex flex-col items-center justify-center rounded-lg border p-1.5 text-center transition-all duration-150 cursor-pointer ${getColor(
+              className={`flex flex-col items-center justify-center rounded-lg border p-1 text-center transition-all duration-150 cursor-pointer ${getColor(
                 slot.status,
                 isSelected
               )}`}
@@ -122,9 +119,9 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
 
       {/* Detail card for selected hour */}
       {selectedSlot && (
-        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] shrink-0">
+        <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-2.5 text-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] shrink-0">
               {selectedSlot.hour >= 6 && selectedSlot.hour <= 17 ? (
                 <Sun className="h-4 w-4 text-amber-500" />
               ) : (
@@ -133,9 +130,9 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-[var(--text-primary)] text-sm">Window {selectedSlot.label}</span>
+                <span className="font-semibold text-[var(--text-primary)] text-xs">{selectedSlot.label}</span>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+                  className={`px-1.5 py-0.2 rounded-full text-[9px] font-semibold uppercase tracking-wider ${
                     selectedSlot.status === 'optimal'
                       ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                       : selectedSlot.status === 'peak'
@@ -143,27 +140,19 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
                       : 'bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/30'
                   }`}
                 >
-                  {selectedSlot.status === 'optimal' ? 'Optimal Dispatch' : selectedSlot.status}
+                  {selectedSlot.status}
+                </span>
+                <span className="text-[var(--text-muted)] font-mono text-[11px]">
+                  {selectedSlot.intensity.toFixed(2)} kg CO₂e / kWh
                 </span>
               </div>
-              <p className="text-[var(--text-muted)] text-[11px] mt-0.5">
-                Marginal Emission Factor:{' '}
-                <strong className="text-[var(--text-primary)] font-mono">{selectedSlot.intensity.toFixed(2)} kg CO₂e / kWh</strong>
-              </p>
             </div>
           </div>
 
-          <div className="mt-3 sm:mt-0 flex items-center gap-4">
+          <div className="mt-2 sm:mt-0 flex items-center gap-3">
             <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] block">Renewable Blend</span>
-              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-sm">{selectedSlot.renewablePct}%</span>
-            </div>
-            <div className="h-6 w-px bg-[var(--border-subtle)]" />
-            <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] block">Delta vs Peak</span>
-              <span className="font-mono text-[var(--text-primary)] font-medium text-xs">
-                {selectedSlot.status === 'optimal' ? '-44.9% (Best)' : selectedSlot.status === 'peak' ? 'Reference Peak' : '-22.4%'}
-              </span>
+              <span className="text-[9px] uppercase font-mono tracking-wider text-[var(--text-muted)] block">Renewable</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-xs">{selectedSlot.renewablePct}%</span>
             </div>
           </div>
         </div>

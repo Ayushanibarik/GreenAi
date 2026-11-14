@@ -22,7 +22,6 @@ import { Link } from 'react-router-dom';
 export const Dashboard: React.FC = () => {
   const { data: telemetry, connectionStatus } = useTelemetry();
   const [workloads, setWorkloads] = useState<Workload[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -32,13 +31,12 @@ export const Dashboard: React.FC = () => {
         if (mounted && res.data && res.data.length > 0) {
           setWorkloads(res.data);
         }
-      } catch (err) {
-        // Fallback to empirical baseline workload dataset
+      } catch {
         if (mounted) {
           setWorkloads([
             {
               id: 'WL-8941',
-              name: 'ResNet-18 ImageNet Evaluation',
+              name: 'ResNet-18 ImageNet Validation',
               model_type: 'Computer Vision',
               status: 'completed',
               energy_wh: 15.6,
@@ -60,7 +58,7 @@ export const Dashboard: React.FC = () => {
             },
             {
               id: 'WL-8943',
-              name: 'BERT-Base Sentiment Batch Profiling',
+              name: 'BERT-Base Sentiment Profiling',
               model_type: 'NLP Transformer',
               status: 'running',
               energy_wh: 48.2,
@@ -71,7 +69,7 @@ export const Dashboard: React.FC = () => {
             },
             {
               id: 'WL-8944',
-              name: 'Whisper-Small Audio Transcribe',
+              name: 'Whisper-Small Speech Transcribe',
               model_type: 'Speech Processing',
               status: 'pending',
               energy_wh: 0,
@@ -82,8 +80,6 @@ export const Dashboard: React.FC = () => {
             },
           ]);
         }
-      } finally {
-        if (mounted) setIsLoading(false);
       }
     };
     fetchWorkloads();
@@ -94,80 +90,59 @@ export const Dashboard: React.FC = () => {
 
   const currentPower = telemetry?.power_w ?? 84.6;
   const completedCount = workloads.filter((w) => w.status === 'completed').length;
-  const runningCount = workloads.filter((w) => w.status === 'running').length;
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* Research-Grade Hero Section */}
-      <section className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:p-8 shadow-sm">
-        <div className="relative grid gap-6 lg:grid-cols-[1.5fr_0.9fr] lg:items-center">
-          <div className="max-w-2xl">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Scientific Telemetry &amp; Optimization Architecture
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-              Real-Time ML Workload Energy &amp; Carbon Intelligence
+    <div className="space-y-5 pb-8">
+      {/* Top Banner */}
+      <section className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 sm:p-6 shadow-sm">
+        <div className="grid gap-5 lg:grid-cols-[1.5fr_0.9fr] lg:items-center">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              Real-Time Workload Intelligence
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-              Empirical power measurement via ESP32-S3 / INA219 direct bus telemetry, RAPL hardware counters, and multi-objective Pareto optimization across model architectures and execution precisions.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
               <Link
                 to="/optimizer"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-primary)] px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-primary)] px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-opacity"
               >
                 <Sliders className="h-3.5 w-3.5" />
-                Pareto Optimizer
+                Optimizer
               </Link>
               <Link
                 to="/carbon"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-card)] transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-card)] transition-colors"
               >
                 <Calendar className="h-3.5 w-3.5" />
-                Diurnal Scheduler
+                Scheduler
               </Link>
               <Link
                 to="/hardware"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-card)] transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-card)] transition-colors"
               >
                 <Cpu className="h-3.5 w-3.5" />
-                Hardware Bus Console
+                Hardware Bus
               </Link>
             </div>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-4 sm:p-5">
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                Dynamic Energy Reduction
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                Energy Reduction
               </span>
               <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                INT8 / ONNX Active
+                INT8 / ONNX
               </span>
             </div>
-            <div className="mt-4 flex items-end justify-between gap-4">
-              <div>
-                <div className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] font-mono">
-                  62.9%
-                </div>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
-                  Joule savings vs unconstrained FP32 baseline
-                </p>
+            <div className="mt-2.5 flex items-baseline justify-between">
+              <div className="text-3xl font-bold tracking-tight text-[var(--text-primary)] font-mono">
+                62.9%
               </div>
-              <div className="h-14 w-28 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] p-2">
-                <div className="text-[9px] font-mono text-[var(--text-muted)] uppercase">Status</div>
-                <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <Activity className="h-3 w-3" />
-                  {connectionStatus === 'live' ? '10Hz Stream' : 'Sim Jitter'}
-                </div>
-              </div>
+              <span className="text-xs font-mono text-[var(--text-muted)]">vs FP32 baseline</span>
             </div>
-            <div className="mt-4 border-t border-[var(--border-subtle)] pt-2.5 text-[11px] text-[var(--text-muted)] flex items-center justify-between">
-              <span>Bus: 12.02V · 7.04A</span>
-              <span className="font-mono">PUE: 1.15 Reference</span>
+            <div className="mt-3 border-t border-[var(--border-subtle)] pt-2 text-[11px] font-mono text-[var(--text-muted)] flex items-center justify-between">
+              <span>12.02V · 7.04A</span>
+              <span>PUE 1.15</span>
             </div>
           </div>
         </div>
@@ -176,44 +151,39 @@ export const Dashboard: React.FC = () => {
       {/* Primary KPI Metrics */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          label="Cumulative Energy Saved"
+          label="Energy Saved"
           value="1,428.6"
           unit="Wh"
           trend={{ value: 62.9, isPositive: true, label: 'vs FP32' }}
           icon={<Zap className="h-4 w-4" />}
-          subtext="Quantized & Scheduled Runs"
         />
 
         <MetricCard
-          label="Operational CO₂ Avoided"
+          label="CO₂ Avoided"
           value="1,171.5"
-          unit="g CO₂e"
-          trend={{ value: 44.8, isPositive: true, label: 'grid offset' }}
+          unit="g"
+          trend={{ value: 44.8, isPositive: true, label: 'offset' }}
           icon={<Leaf className="h-4 w-4" />}
-          subtext="CEA Baseline v19 Diurnal"
         />
 
         <MetricCard
-          label="Validated Workloads"
+          label="Workloads"
           value={workloads.length.toString()}
-          unit="jobs"
-          trend={{ value: completedCount, isPositive: true, label: 'completed' }}
+          trend={{ value: completedCount, isPositive: true, label: 'done' }}
           icon={<CheckCircle2 className="h-4 w-4" />}
-          subtext={`${runningCount} active execution(s)`}
         />
 
         <MetricCard
-          label="Average Power Draw"
+          label="Power Draw"
           value={currentPower.toFixed(1)}
           unit="W"
           trend={{ value: 14.2, isPositive: true, label: 'under cap' }}
           icon={<Cpu className="h-4 w-4" />}
-          subtext="ESP32-S3 10Hz Telemetry"
         />
       </div>
 
       {/* Main Analytical Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <EnergyTimeChart />
         </div>
@@ -225,16 +195,11 @@ export const Dashboard: React.FC = () => {
 
       {/* Recent Workloads Registry */}
       <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 sm:p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
-              <Layers className="h-4 w-4 text-[var(--accent-primary)]" />
-              Recent Workload Execution Records
-            </h3>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Empirically measured and estimated model profiling runs
-            </p>
-          </div>
+        <div className="mb-3 flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+          <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
+            <Layers className="h-4 w-4 text-[var(--accent-primary)]" />
+            Recent Workloads
+          </h3>
           <Link
             to="/workloads"
             className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent-primary)] hover:underline"
@@ -247,36 +212,36 @@ export const Dashboard: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Workload ID</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Model &amp; Task</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">ID</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Model</th>
                 <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Emissions (g CO₂e)</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Emissions</th>
                 <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Timestamp</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Time</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {workloads.slice(0, 5).map((wl) => (
                 <tr key={wl.id} className="hover:bg-[var(--surface-muted)] transition-colors">
-                  <td className="py-3 px-3 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
-                  <td className="py-3 px-3">
+                  <td className="py-2.5 px-3 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
+                  <td className="py-2.5 px-3">
                     <div className="font-medium text-[var(--text-primary)]">{wl.name}</div>
                     <span className="text-[10px] text-[var(--text-muted)] font-mono">{wl.model_type}</span>
                   </td>
-                  <td className="py-3 px-3">
+                  <td className="py-2.5 px-3">
                     <StatusBadge status={wl.status} />
                   </td>
-                  <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
+                  <td className="py-2.5 px-3 font-mono font-medium text-[var(--text-primary)]">
                     {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
                   </td>
-                  <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
+                  <td className="py-2.5 px-3 font-mono text-[var(--text-muted)]">
                     {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
                   </td>
-                  <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
+                  <td className="py-2.5 px-3 font-mono text-[var(--text-muted)]">
                     {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
                   </td>
-                  <td className="py-3 px-3 text-right text-[var(--text-muted)] text-[11px] font-mono">
+                  <td className="py-2.5 px-3 text-right text-[var(--text-muted)] text-[11px] font-mono">
                     {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>

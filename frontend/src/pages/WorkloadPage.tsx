@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
-import { PlusCircle, Search, Filter, Layers, RefreshCw, X, Cpu, Clock, Zap, Leaf } from 'lucide-react';
+import { PlusCircle, Search, Filter, Layers, RefreshCw } from 'lucide-react';
 import api from '../services/api';
 import type { Workload } from '../types';
 
@@ -90,7 +90,7 @@ export const WorkloadPage: React.FC = () => {
         setWorkloads(res.data);
       }
     } catch {
-      // retain current state
+      // retain fallback
     } finally {
       setIsRefreshing(false);
     }
@@ -115,7 +115,6 @@ export const WorkloadPage: React.FC = () => {
         setWorkloads([res.data, ...workloads]);
       }
     } catch {
-      // Local fallback addition
       const newWorkload: Workload = {
         id: `WL-${Math.floor(1000 + Math.random() * 9000)}`,
         name: formData.name || 'New ML Benchmark Run',
@@ -155,24 +154,19 @@ export const WorkloadPage: React.FC = () => {
   const totalCarbon = workloads.reduce((acc, curr) => acc + (curr.carbon_g || 0), 0);
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-5 pb-8">
       {/* Header and Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              Machine Learning Workload Registry
-            </h1>
-            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
-              {workloads.length} Workloads Registered
-            </span>
-          </div>
-          <p className="mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
-            Lifecycle monitoring, real-time power profiling, and empirical emissions traces for model runs
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+            Workloads
+          </h1>
+          <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300 font-mono">
+            {workloads.length}
+          </span>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -194,79 +188,65 @@ export const WorkloadPage: React.FC = () => {
       </div>
 
       {/* Aggregate KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3.5 shadow-sm">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-            Total Workload Trace
+            Workloads
           </span>
-          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono mt-1 block">
+          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono mt-0.5 block">
             {workloads.length}
           </span>
-          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
-            {workloads.filter((w) => w.status === 'completed').length} completed
-          </span>
         </div>
 
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3.5 shadow-sm">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-            Active Executions
+            Running
           </span>
-          <span className="text-2xl font-bold text-sky-600 dark:text-sky-400 font-mono mt-1 block">
+          <span className="text-2xl font-bold text-sky-600 dark:text-sky-400 font-mono mt-0.5 block">
             {workloads.filter((w) => w.status === 'running').length}
           </span>
-          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
-            Inference / Training Jobs
-          </span>
         </div>
 
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3.5 shadow-sm">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
             Cumulative Energy
           </span>
-          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono mt-1 block">
-            {totalEnergy.toFixed(1)}
-          </span>
-          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
-            Watt-hours dissipation
+          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono mt-0.5 block">
+            {totalEnergy.toFixed(1)} <span className="text-xs font-normal text-[var(--text-muted)]">Wh</span>
           </span>
         </div>
 
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3.5 shadow-sm">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
-            Quantified Carbon
+            Emissions
           </span>
-          <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-1 block">
-            {totalCarbon.toFixed(1)}
-          </span>
-          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
-            Grams CO₂e emitted
+          <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
+            {totalCarbon.toFixed(1)} <span className="text-xs font-normal text-[var(--text-muted)]">g</span>
           </span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-2.5 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)]" />
           <input
             type="text"
-            placeholder="Search workloads by ID, name, or architecture..."
+            placeholder="Search workloads..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] py-1.5 pl-9 pr-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
+            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] py-1.5 pl-8 pr-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <Filter className="h-3.5 w-3.5 text-[var(--text-muted)] ml-1" />
-          <span className="text-xs text-[var(--text-muted)] mr-1">Status:</span>
+        <div className="flex items-center gap-1">
           {(['all', 'completed', 'running', 'pending', 'failed'] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
               className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-[var(--accent-primary)] text-white shadow-sm'
+                  ? 'bg-[var(--accent-primary)] text-white shadow-xs'
                   : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
               }`}
             >
@@ -282,40 +262,40 @@ export const WorkloadPage: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Workload ID</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Task &amp; Model</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Emissions (g CO₂e)</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Mean Latency</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
-                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px] text-right">Created At</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">ID</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Name</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Time</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
               {filteredWorkloads.map((wl) => (
                 <tr key={wl.id} className="hover:bg-[var(--surface-muted)] transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-3 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
+                  <td className="py-3 px-3">
                     <div className="font-medium text-[var(--text-primary)]">{wl.name}</div>
                     <span className="text-[10px] text-[var(--text-muted)] font-mono">{wl.model_type}</span>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-3">
                     <StatusBadge status={wl.status} />
                   </td>
-                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--text-primary)]">
+                  <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
                     {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
                   </td>
-                  <td className="py-3.5 px-4 font-mono text-[var(--text-muted)]">
+                  <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
                     {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
                   </td>
-                  <td className="py-3.5 px-4 font-mono text-[var(--text-muted)]">
+                  <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
                     {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
                   </td>
-                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--text-primary)]">
+                  <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
                     {wl.accuracy ? `${wl.accuracy.toFixed(1)}%` : '—'}
                   </td>
-                  <td className="py-3.5 px-4 text-right text-[var(--text-muted)] text-[11px] font-mono">
+                  <td className="py-3 px-3 text-right text-[var(--text-muted)] text-[11px] font-mono">
                     {new Date(wl.created_at).toLocaleDateString()} {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>
@@ -329,12 +309,12 @@ export const WorkloadPage: React.FC = () => {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Submit New ML Workload"
+        title="Submit Workload"
         size="md"
       >
-        <form onSubmit={handleCreate} className="space-y-4 text-xs">
+        <form onSubmit={handleCreate} className="space-y-3.5 text-xs">
           <div>
-            <label className="block text-[var(--text-secondary)] font-medium mb-1">Workload Name</label>
+            <label className="block text-[var(--text-secondary)] font-medium mb-1">Name</label>
             <input
               type="text"
               required
@@ -347,40 +327,40 @@ export const WorkloadPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[var(--text-secondary)] font-medium mb-1">Model Architecture</label>
+              <label className="block text-[var(--text-secondary)] font-medium mb-1">Model</label>
               <select
                 value={formData.model_type}
                 onChange={(e) => setFormData({ ...formData, model_type: e.target.value })}
                 className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
               >
-                <option value="Computer Vision">Computer Vision (ResNet / ViT)</option>
-                <option value="Edge Vision">Edge Vision (MobileNet-V3)</option>
-                <option value="NLP Transformer">NLP Transformer (BERT / RoBERTa)</option>
+                <option value="Computer Vision">Computer Vision (ResNet)</option>
+                <option value="Edge Vision">Edge Vision (MobileNet)</option>
+                <option value="NLP Transformer">NLP Transformer (BERT)</option>
                 <option value="Audio Processing">Audio Processing (Whisper)</option>
-                <option value="Generative AI">Generative AI (Diffusion / LLM)</option>
+                <option value="Generative AI">Generative AI</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-[var(--text-secondary)] font-medium mb-1">Precision Profile</label>
+              <label className="block text-[var(--text-secondary)] font-medium mb-1">Precision</label>
               <select
                 value={formData.precision}
                 onChange={(e) => setFormData({ ...formData, precision: e.target.value })}
                 className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
               >
-                <option value="INT8">INT8 Quantized (Post-Training)</option>
-                <option value="ONNX">ONNX Runtime Optimized</option>
+                <option value="INT8">INT8 Quantized</option>
+                <option value="ONNX">ONNX Runtime</option>
                 <option value="FP16">FP16 Half-Precision</option>
-                <option value="FP32">FP32 Unconstrained Baseline</option>
+                <option value="FP32">FP32 Baseline</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-[var(--text-secondary)] font-medium mb-1">Dataset Identifier (Optional)</label>
+            <label className="block text-[var(--text-secondary)] font-medium mb-1">Dataset (Optional)</label>
             <input
               type="text"
-              placeholder="e.g. ImageNet-1K / GLUE-SST2"
+              placeholder="e.g. ImageNet-1K"
               value={formData.dataset}
               onChange={(e) => setFormData({ ...formData, dataset: e.target.value })}
               className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
@@ -392,7 +372,7 @@ export const WorkloadPage: React.FC = () => {
               Cancel
             </Button>
             <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Registering...' : 'Dispatch Workload'}
+              {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
           </div>
         </form>

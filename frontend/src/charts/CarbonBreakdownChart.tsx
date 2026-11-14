@@ -14,11 +14,11 @@ interface CarbonSegment {
 }
 
 const defaultData: CarbonSegment[] = [
-  { name: 'Model Inference', value: 412.5 },
-  { name: 'Data Pipeline & Preprocessing', value: 184.2 },
-  { name: 'Fine-Tuning Checkpoints', value: 142.1 },
-  { name: 'Validation & Evaluation', value: 95.8 },
-  { name: 'PUE & Auxiliary Facility Load', value: 68.4 },
+  { name: 'Inference', value: 412.5 },
+  { name: 'Data Pipeline', value: 184.2 },
+  { name: 'Fine-Tuning', value: 142.1 },
+  { name: 'Evaluation', value: 95.8 },
+  { name: 'PUE Overhead', value: 68.4 },
 ];
 
 const SCIENTIFIC_PALETTE = ['#0284c7', '#2563eb', '#059669', '#d97706', '#7c3aed'];
@@ -30,25 +30,22 @@ interface CarbonBreakdownChartProps {
 
 export const CarbonBreakdownChart: React.FC<CarbonBreakdownChartProps> = ({
   data = defaultData,
-  title = 'Emissions by Computational Subsystem',
+  title = 'Emissions Breakdown',
 }) => {
   const totalCarbon = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
-      <div className="mb-4">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-5 shadow-sm transition-colors duration-200">
+      <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
           {title}
         </h3>
-        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-          Total Quantified Footprint:{' '}
-          <span className="font-mono font-semibold text-[var(--text-primary)]">
-            {totalCarbon.toFixed(1)} g CO₂e
-          </span>
-        </p>
+        <span className="font-mono text-xs font-semibold text-[var(--text-primary)]">
+          {totalCarbon.toFixed(1)} g CO₂e
+        </span>
       </div>
 
-      <div className="relative h-72 w-full">
+      <div className="relative h-68 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

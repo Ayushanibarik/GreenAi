@@ -32,20 +32,17 @@ interface ModelComparisonChartProps {
 
 export const ModelComparisonChart: React.FC<ModelComparisonChartProps> = ({
   data = defaultData,
-  title = 'Empirical Energy vs Latency Trade-Off Analysis',
+  title = 'Energy vs Latency',
 }) => {
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
-      <div className="mb-4">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-5 shadow-sm transition-colors duration-200">
+      <div className="mb-3">
         <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
           {title}
         </h3>
-        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-          Dual-axis evaluation of Joules consumed per batch versus inference latency (ms)
-        </p>
       </div>
 
-      <div className="h-72 w-full">
+      <div className="h-68 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
@@ -79,20 +76,20 @@ export const ModelComparisonChart: React.FC<ModelComparisonChartProps> = ({
               }}
             />
             <Legend
-              wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+              wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
               formatter={(value) => <span className="text-[var(--text-secondary)] font-medium">{value}</span>}
             />
             <Bar
               yAxisId="left"
               dataKey="energy_wh"
-              name="Energy Dissipation (Wh)"
+              name="Energy (Wh)"
               fill="#0284c7"
               radius={[4, 4, 0, 0]}
             />
             <Bar
               yAxisId="right"
               dataKey="latency_ms"
-              name="Inference Latency (ms)"
+              name="Latency (ms)"
               fill="#7c3aed"
               radius={[4, 4, 0, 0]}
             />

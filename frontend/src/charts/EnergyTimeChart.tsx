@@ -38,32 +38,27 @@ interface EnergyTimeChartProps {
 
 export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
   data = defaultData,
-  title = 'Workload Power Trajectory',
+  title = 'Power Trajectory',
 }) => {
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
-      <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
-            {title}
-          </h3>
-          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-            Comparative power dissipation: Baseline (Unconstrained) vs Optimal Dynamic DFS (Watts)
-          </p>
-        </div>
-        <div className="flex items-center gap-3 text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 font-medium text-sky-600 dark:text-sky-300">
-            <span className="h-2 w-2 rounded-full bg-sky-500" />
-            Optimized DFS
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-5 shadow-sm transition-colors duration-200">
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+        <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+          {title}
+        </h3>
+        <div className="flex items-center gap-2.5 text-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 font-medium text-sky-700 dark:text-sky-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+            Optimized
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1 font-medium text-[var(--text-muted)]">
-            <span className="h-2 w-2 rounded-full bg-slate-400" />
-            Baseline FP32
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-0.5 font-medium text-[var(--text-muted)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+            Baseline
           </span>
         </div>
       </div>
 
-      <div className="h-72 w-full">
+      <div className="h-68 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>

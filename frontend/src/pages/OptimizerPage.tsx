@@ -4,18 +4,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
-  Cpu,
   ArrowRight,
-  Zap,
-  Leaf,
-  Timer,
   Award,
   Layers,
   Activity,
-  RotateCcw,
 } from 'lucide-react';
 import api from '../services/api';
-import type { OptimizationResult } from '../types';
 
 interface CandidateConfig {
   id: string;
@@ -45,7 +39,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_fp16',
-    name: 'ResNet-18 FP16 (Half Precision)',
+    name: 'ResNet-18 FP16',
     architecture: 'ResNet-18',
     precision: 'FP16',
     accuracy: 93.0,
@@ -57,7 +51,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_onnx',
-    name: 'ResNet-18 ONNX Runtime',
+    name: 'ResNet-18 ONNX',
     architecture: 'ResNet-18',
     precision: 'ONNX',
     accuracy: 93.1,
@@ -69,7 +63,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_int8',
-    name: 'ResNet-18 INT8 Quantized (PTQ)',
+    name: 'ResNet-18 INT8',
     architecture: 'ResNet-18',
     precision: 'INT8',
     accuracy: 92.4,
@@ -81,7 +75,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_fp32',
-    name: 'MobileNet-V3 FP32 Baseline',
+    name: 'MobileNet-V3 FP32',
     architecture: 'MobileNet-V3',
     precision: 'FP32',
     accuracy: 89.6,
@@ -93,7 +87,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_onnx',
-    name: 'MobileNet-V3 ONNX Runtime',
+    name: 'MobileNet-V3 ONNX',
     architecture: 'MobileNet-V3',
     precision: 'ONNX',
     accuracy: 89.4,
@@ -105,7 +99,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_int8',
-    name: 'MobileNet-V3 INT8 Ultra-Low Power',
+    name: 'MobileNet-V3 INT8',
     architecture: 'MobileNet-V3',
     precision: 'INT8',
     accuracy: 88.9,
@@ -118,12 +112,10 @@ const ALL_CANDIDATES: CandidateConfig[] = [
 ];
 
 export const OptimizerPage: React.FC = () => {
-  // Constraints state
   const [minAccuracy, setMinAccuracy] = useState<number>(89.0);
   const [maxLatency, setMaxLatency] = useState<number>(80);
   const [maxMemory, setMaxMemory] = useState<number>(1024);
 
-  // Weights
   const [alphaEnergy, setAlphaEnergy] = useState<number>(0.4);
   const [betaLatency, setBetaLatency] = useState<number>(0.3);
   const [gammaAccuracy, setGammaAccuracy] = useState<number>(0.2);
@@ -133,7 +125,7 @@ export const OptimizerPage: React.FC = () => {
   const [applied, setApplied] = useState(false);
   const [apiSynced, setApiSynced] = useState(false);
 
-  const baseline = ALL_CANDIDATES[0]; // ResNet-18 FP32
+  const baseline = ALL_CANDIDATES[0];
 
   const applyPreset = (preset: 'balanced' | 'edge' | 'accurate') => {
     if (preset === 'edge') {
@@ -171,7 +163,6 @@ export const OptimizerPage: React.FC = () => {
       const meetsMem = c.memory_mb <= maxMemory;
       const isFeasible = meetsAcc && meetsLat && meetsMem;
 
-      // Normalized Pareto score (lower is superior)
       const score =
         alphaEnergy * (c.energy_wh / baseline.energy_wh) +
         betaLatency * (c.latency_ms / baseline.latency_ms) +
@@ -209,7 +200,7 @@ export const OptimizerPage: React.FC = () => {
           delta: deltaMemory,
         });
         if (active) setApiSynced(true);
-      } catch (err) {
+      } catch {
         if (active) setApiSynced(false);
       }
     };
@@ -241,21 +232,16 @@ export const OptimizerPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* Header and Live Status Pill */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              Multi-Objective Pareto Optimizer
-            </h1>
-            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
-              {apiSynced ? 'API Synchronized' : 'Local Solver'}
-            </span>
-          </div>
-          <p className="mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
-            Algorithmic selection minimizing loss, latency, Joule consumption, and peak memory allocation
-          </p>
+    <div className="space-y-5 pb-8">
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+            Pareto Optimizer
+          </h1>
+          <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
+            {apiSynced ? 'Synchronized' : 'Local'}
+          </span>
         </div>
 
         {/* Preset Selector */}
@@ -265,43 +251,40 @@ export const OptimizerPage: React.FC = () => {
             onClick={() => applyPreset('edge')}
             className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            Low-Power Edge
+            Edge
           </button>
           <button
             type="button"
             onClick={() => applyPreset('balanced')}
             className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            Balanced Cloud
+            Balanced
           </button>
           <button
             type="button"
             onClick={() => applyPreset('accurate')}
             className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            High-Accuracy
+            Accurate
           </button>
         </div>
       </div>
 
       {/* Main Grid: Controls vs Recommended Candidate */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Controls Column (5 cols) */}
-        <div className="lg:col-span-5 space-y-5">
+        <div className="lg:col-span-5 space-y-4">
           {/* SLA Constraints Card */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-[var(--accent-primary)]" />
-                SLA Operational Constraints
-              </h3>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">Hard Bounds</span>
-            </div>
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm space-y-3.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5 border-b border-[var(--border-subtle)] pb-2.5">
+              <ShieldCheck className="h-4 w-4 text-[var(--accent-primary)]" />
+              SLA Constraints
+            </h3>
 
             {/* Min Accuracy Slider */}
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-medium text-[var(--text-secondary)]">Min Accuracy SLA</span>
+                <span className="font-medium text-[var(--text-secondary)]">Min Accuracy</span>
                 <span className="font-mono font-semibold text-[var(--text-primary)]">{minAccuracy.toFixed(1)}%</span>
               </div>
               <input
@@ -316,16 +299,12 @@ export const OptimizerPage: React.FC = () => {
                 }}
                 className="w-full accent-sky-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
-                <span>85.0%</span>
-                <span>94.0%</span>
-              </div>
             </div>
 
             {/* Max Latency Slider */}
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-medium text-[var(--text-secondary)]">Max Inference Latency</span>
+                <span className="font-medium text-[var(--text-secondary)]">Max Latency</span>
                 <span className="font-mono font-semibold text-[var(--text-primary)]">{maxLatency} ms</span>
               </div>
               <input
@@ -340,16 +319,12 @@ export const OptimizerPage: React.FC = () => {
                 }}
                 className="w-full accent-sky-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
-                <span>15 ms</span>
-                <span>120 ms</span>
-              </div>
             </div>
 
             {/* Max Memory Slider */}
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-medium text-[var(--text-secondary)]">Max Memory Ceiling</span>
+                <span className="font-medium text-[var(--text-secondary)]">Max Memory</span>
                 <span className="font-mono font-semibold text-[var(--text-primary)]">{maxMemory} MB</span>
               </div>
               <input
@@ -364,28 +339,19 @@ export const OptimizerPage: React.FC = () => {
                 }}
                 className="w-full accent-sky-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
-                <span>128 MB</span>
-                <span>1500 MB</span>
-              </div>
             </div>
           </div>
 
           {/* Objective Function Weights */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
-                <Sliders className="h-4 w-4 text-[var(--accent-primary)]" />
-                Pareto Objective Weights
-              </h3>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">
-                Σ = {(alphaEnergy + betaLatency + gammaAccuracy + deltaMemory).toFixed(1)}
-              </span>
-            </div>
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5 border-b border-[var(--border-subtle)] pb-2.5">
+              <Sliders className="h-4 w-4 text-[var(--accent-primary)]" />
+              Objective Weights
+            </h3>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
               <div>
-                <label className="text-[11px] text-[var(--text-muted)] block mb-1">α Energy Weight</label>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">α Energy</label>
                 <input
                   type="number"
                   step="0.05"
@@ -397,7 +363,7 @@ export const OptimizerPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-[var(--text-muted)] block mb-1">β Latency Weight</label>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">β Latency</label>
                 <input
                   type="number"
                   step="0.05"
@@ -409,7 +375,7 @@ export const OptimizerPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-[var(--text-muted)] block mb-1">γ Accuracy Weight</label>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">γ Accuracy</label>
                 <input
                   type="number"
                   step="0.05"
@@ -421,7 +387,7 @@ export const OptimizerPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-[11px] text-[var(--text-muted)] block mb-1">δ Memory Weight</label>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">δ Memory</label>
                 <input
                   type="number"
                   step="0.05"
@@ -437,86 +403,73 @@ export const OptimizerPage: React.FC = () => {
         </div>
 
         {/* Recommended Candidate & Empirical Delta (7 cols) */}
-        <div className="lg:col-span-7 space-y-5">
-          {/* Optimal Recommendation Card */}
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-sm relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                    Optimal Pareto Front Frontier
-                  </span>
-                </div>
-                <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
+                <h2 className="text-lg font-bold tracking-tight text-[var(--text-primary)]">
                   {recommended.name}
                 </h2>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Architecture: {recommended.architecture} · Precision: {recommended.precision}
-                </p>
               </div>
 
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 <Award className="h-3.5 w-3.5" />
                 Rank #1
               </span>
             </div>
 
-            {/* Side-by-Side Comparison Metrics */}
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
-                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Energy Draw</span>
-                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.energy_wh.toFixed(1)}</span>
+            {/* Metrics */}
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-2.5">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Energy</span>
+                <span className="text-lg font-bold text-[var(--text-primary)] font-mono">{recommended.energy_wh.toFixed(1)}</span>
                 <span className="text-[10px] text-[var(--text-muted)] ml-1">Wh</span>
-                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-                  -{energySavedPct}% vs Base
+                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  -{energySavedPct}%
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
-                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Mean Latency</span>
-                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.latency_ms}</span>
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-2.5">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Latency</span>
+                <span className="text-lg font-bold text-[var(--text-primary)] font-mono">{recommended.latency_ms}</span>
                 <span className="text-[10px] text-[var(--text-muted)] ml-1">ms</span>
-                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-                  -{latencyReductionPct}% vs Base
+                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  -{latencyReductionPct}%
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-2.5">
                 <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Accuracy</span>
-                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.accuracy.toFixed(1)}</span>
+                <span className="text-lg font-bold text-[var(--text-primary)] font-mono">{recommended.accuracy.toFixed(1)}</span>
                 <span className="text-[10px] text-[var(--text-muted)] ml-1">%</span>
-                <div className={`text-[10px] font-medium mt-1 ${parseFloat(accuracyDelta) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                  {accuracyDelta}% delta
+                <div className={`text-[10px] font-medium ${parseFloat(accuracyDelta) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                  {accuracyDelta}%
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
-                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">CO₂ Footprint</span>
-                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.co2_g.toFixed(1)}</span>
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-2.5">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">CO₂e</span>
+                <span className="text-lg font-bold text-[var(--text-primary)] font-mono">{recommended.co2_g.toFixed(1)}</span>
                 <span className="text-[10px] text-[var(--text-muted)] ml-1">g</span>
-                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-                  -{co2AvoidedG}g avoided
+                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  -{co2AvoidedG}g
                 </div>
               </div>
             </div>
 
             {/* Action Bar */}
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-4">
-              <div className="text-xs text-[var(--text-muted)] flex items-center gap-2">
-                <Activity className="h-3.5 w-3.5 text-emerald-500" />
-                <span>
-                  {feasibleCandidates.length} of {ALL_CANDIDATES.length} candidates satisfy hard SLA constraints
-                </span>
-              </div>
+            <div className="mt-4 flex items-center justify-between border-t border-[var(--border-subtle)] pt-3">
+              <span className="text-xs font-mono text-[var(--text-muted)]">
+                {feasibleCandidates.length}/{ALL_CANDIDATES.length} Feasible
+              </span>
 
               <button
                 type="button"
                 onClick={handleRunOptimizer}
                 disabled={isOptimizing}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-primary)] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
               >
-                {isOptimizing ? 'Profiling Hardware...' : applied ? 'Configuration Applied' : 'Deploy Selected Profile'}
+                {isOptimizing ? 'Profiling...' : applied ? 'Applied' : 'Apply Configuration'}
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -525,35 +478,27 @@ export const OptimizerPage: React.FC = () => {
       </div>
 
       {/* Candidate Evaluation Matrix */}
-      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 sm:p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
-          <div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
-              <Layers className="h-4 w-4 text-[var(--accent-primary)]" />
-              Candidate Profile Evaluation Matrix
-            </h3>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Multi-criteria assessment against hard constraints and scalarized loss metric
-            </p>
-          </div>
-          <span className="text-xs font-mono text-[var(--text-muted)]">
-            Total Evaluated: {evaluatedCandidates.length}
-          </span>
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+        <div className="mb-3 flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+          <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
+            <Layers className="h-4 w-4 text-[var(--accent-primary)]" />
+            Candidates
+          </h3>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Candidate</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Precision</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Memory</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e (g)</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Feasibility</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Score</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Model</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Precision</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Memory</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
+                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Score</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
@@ -568,23 +513,23 @@ export const OptimizerPage: React.FC = () => {
                         : 'hover:bg-[var(--surface-muted)]'
                     }`}
                   >
-                    <td className="py-3 px-3 font-medium text-[var(--text-primary)] flex items-center gap-2">
+                    <td className="py-2.5 px-3 font-medium text-[var(--text-primary)] flex items-center gap-2">
                       {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />}
                       {c.name}
                     </td>
-                    <td className="py-3 px-3 font-mono text-[var(--text-muted)]">{c.precision}</td>
-                    <td className={`py-3 px-3 font-mono ${c.meetsAcc ? 'text-[var(--text-primary)]' : 'text-rose-500 font-semibold'}`}>
+                    <td className="py-2.5 px-3 font-mono text-[var(--text-muted)]">{c.precision}</td>
+                    <td className={`py-2.5 px-3 font-mono ${c.meetsAcc ? 'text-[var(--text-primary)]' : 'text-rose-500 font-semibold'}`}>
                       {c.accuracy.toFixed(1)}%
                     </td>
-                    <td className={`py-3 px-3 font-mono ${c.meetsLat ? 'text-[var(--text-primary)]' : 'text-rose-500 font-semibold'}`}>
+                    <td className={`py-2.5 px-3 font-mono ${c.meetsLat ? 'text-[var(--text-primary)]' : 'text-rose-500 font-semibold'}`}>
                       {c.latency_ms} ms
                     </td>
-                    <td className="py-3 px-3 font-mono text-[var(--text-primary)]">{c.energy_wh.toFixed(1)} Wh</td>
-                    <td className={`py-3 px-3 font-mono ${c.meetsMem ? 'text-[var(--text-muted)]' : 'text-rose-500 font-semibold'}`}>
+                    <td className="py-2.5 px-3 font-mono text-[var(--text-primary)]">{c.energy_wh.toFixed(1)} Wh</td>
+                    <td className={`py-2.5 px-3 font-mono ${c.meetsMem ? 'text-[var(--text-muted)]' : 'text-rose-500 font-semibold'}`}>
                       {c.memory_mb} MB
                     </td>
-                    <td className="py-3 px-3 font-mono text-[var(--text-muted)]">{c.co2_g.toFixed(1)} g</td>
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3 font-mono text-[var(--text-muted)]">{c.co2_g.toFixed(1)} g</td>
+                    <td className="py-2.5 px-3">
                       {c.isFeasible ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                           <CheckCircle2 className="h-3 w-3" /> Feasible
@@ -595,7 +540,7 @@ export const OptimizerPage: React.FC = () => {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono text-[var(--text-secondary)]">
+                    <td className="py-2.5 px-3 text-right font-mono text-[var(--text-secondary)]">
                       {c.score.toFixed(3)}
                     </td>
                   </tr>

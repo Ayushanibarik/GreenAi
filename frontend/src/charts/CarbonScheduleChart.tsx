@@ -10,7 +10,6 @@ import {
   ResponsiveContainer,
   ReferenceArea,
 } from 'recharts';
-import { Sun, Flame, Clock } from 'lucide-react';
 
 export interface HourGridPoint {
   hour: number;
@@ -59,37 +58,26 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
   immediateWindow,
 }) => {
   return (
-    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
-      <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              CEA Baseline v19 Diurnal Model
-            </span>
-          </div>
-          <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
-            Regional Grid Carbon Intensity (24-Hour Profile)
-          </h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            Marginal grid emission factor (kg CO₂e / kWh) across Eastern Regional Grid
-          </p>
-        </div>
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-5 shadow-sm transition-colors duration-200">
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+          24-Hour Grid Carbon Intensity
+        </h3>
 
-        {/* Legend Indicators */}
+        {/* Legend */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-700 dark:text-sky-300 font-medium">
+          <div className="flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-sky-700 dark:text-sky-300 font-medium">
             <span className="h-2 w-2 rounded-full bg-sky-500" />
-            <span>Odisha (Eastern Grid)</span>
+            <span>Odisha</span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1 text-[var(--text-muted)] font-medium">
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-0.5 text-[var(--text-muted)] font-medium">
             <span className="h-2 w-2 rounded-full bg-indigo-500" />
             <span>National Average</span>
           </div>
         </div>
       </div>
 
-      <div className="h-72 w-full">
+      <div className="h-68 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <defs>
@@ -127,7 +115,6 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               formatter={(val: any) => [`${Number(val).toFixed(2)} kg CO₂e / kWh`]}
             />
 
-            {/* Optimal Green Window Highlight Area */}
             {optimalWindow && (
               <ReferenceArea
                 x1={data[optimalWindow.startHour]?.timeLabel}
@@ -139,7 +126,6 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               />
             )}
 
-            {/* Immediate Window Area */}
             {immediateWindow && (
               <ReferenceArea
                 x1={data[immediateWindow.startHour]?.timeLabel}
@@ -158,7 +144,7 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               strokeWidth={2.5}
               fillOpacity={1}
               fill="url(#odishaCarbonGrad)"
-              name="Odisha Grid"
+              name="Odisha"
             />
             <Line
               type="monotone"
@@ -167,26 +153,10 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
-              name="National Baseline"
+              name="National"
             />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Scientific Insights Footer */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-[var(--border-subtle)] text-xs">
-        <div className="flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-muted)]">
-          <Clock className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
-          <span>00:00 – 05:00: Basal Thermal Equilibrium</span>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-emerald-700 dark:text-emerald-300 font-medium">
-          <Sun className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>11:00 – 15:00: Solar High Dispatch Window</span>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-rose-700 dark:text-rose-300 font-medium">
-          <Flame className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
-          <span>18:00 – 21:00: Evening Thermal Peaker Load</span>
-        </div>
       </div>
     </div>
   );
