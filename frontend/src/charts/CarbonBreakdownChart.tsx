@@ -14,14 +14,14 @@ interface CarbonSegment {
 }
 
 const defaultData: CarbonSegment[] = [
-  { name: 'Content processing', value: 412.5 },
-  { name: 'Image processing', value: 184.2 },
-  { name: 'Text processing', value: 95.8 },
-  { name: 'Batch processing', value: 68.4 },
-  { name: 'Audio processing', value: 142.1 },
+  { name: 'Model Inference', value: 412.5 },
+  { name: 'Data Pipeline & Preprocessing', value: 184.2 },
+  { name: 'Fine-Tuning Checkpoints', value: 142.1 },
+  { name: 'Validation & Evaluation', value: 95.8 },
+  { name: 'PUE & Auxiliary Facility Load', value: 68.4 },
 ];
 
-const EMERALD_SHADES = ['#0A84FF', '#5AA9FF', '#5E5CE6', '#8CC2FF', '#A8A5FF', '#6E6ADD'];
+const SCIENTIFIC_PALETTE = ['#0284c7', '#2563eb', '#059669', '#d97706', '#7c3aed'];
 
 interface CarbonBreakdownChartProps {
   data?: CarbonSegment[];
@@ -30,51 +30,54 @@ interface CarbonBreakdownChartProps {
 
 export const CarbonBreakdownChart: React.FC<CarbonBreakdownChartProps> = ({
   data = defaultData,
-  title = 'Impact by activity',
+  title = 'Emissions by Computational Subsystem',
 }) => {
   const totalCarbon = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="glass-card p-5 sm:p-6">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold tracking-tight text-white">{title}</h3>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Tracked impact: <span className="text-emerald-400 font-mono font-bold">{totalCarbon.toFixed(1)} g CO₂e</span>
+        <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+          {title}
+        </h3>
+        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+          Total Quantified Footprint:{' '}
+          <span className="font-mono font-semibold text-[var(--text-primary)]">
+            {totalCarbon.toFixed(1)} g CO₂e
+          </span>
         </p>
       </div>
 
-      <div className="h-72 w-full relative">
+      <div className="relative h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={90}
-              paddingAngle={5}
+              innerRadius={55}
+              outerRadius={85}
+              paddingAngle={4}
               dataKey="value"
             >
               {data.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={EMERALD_SHADES[index % EMERALD_SHADES.length]}
-                  stroke="#15161a"
-                  strokeWidth={3}
+                  fill={SCIENTIFIC_PALETTE[index % SCIENTIFIC_PALETTE.length]}
+                  stroke="var(--surface-card)"
+                  strokeWidth={2}
                 />
               ))}
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                borderColor: 'rgba(255, 255, 255, 0.12)',
-                borderRadius: '16px',
-                boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                borderColor: 'var(--chart-tooltip-border)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                 fontSize: '12px',
-                color: '#f8fafc',
-                padding: '10px 14px',
+                color: 'var(--chart-tooltip-text)',
+                padding: '8px 12px',
               }}
               formatter={(val: number) => [`${val.toFixed(1)} g CO₂e`, 'Emissions']}
             />
@@ -82,7 +85,7 @@ export const CarbonBreakdownChart: React.FC<CarbonBreakdownChartProps> = ({
               verticalAlign="bottom"
               height={36}
               iconType="circle"
-              wrapperStyle={{ fontSize: '11px', color: '#94a3b8', paddingTop: '8px' }}
+              wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)', paddingTop: '8px' }}
             />
           </PieChart>
         </ResponsiveContainer>

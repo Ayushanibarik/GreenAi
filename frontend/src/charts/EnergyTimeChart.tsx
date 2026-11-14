@@ -38,25 +38,27 @@ interface EnergyTimeChartProps {
 
 export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
   data = defaultData,
-  title = 'Energy use over time',
+  title = 'Workload Power Trajectory',
 }) => {
   return (
-    <div className="glass-card p-5 sm:p-6">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
       <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold tracking-tight text-white">{title}</h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            A simple comparison with the standard profile.
+          <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+            {title}
+          </h3>
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+            Comparative power dissipation: Baseline (Unconstrained) vs Optimal Dynamic DFS (Watts)
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="glass-pill flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium text-emerald-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Current profile
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 font-medium text-sky-600 dark:text-sky-300">
+            <span className="h-2 w-2 rounded-full bg-sky-500" />
+            Optimized DFS
           </span>
-          <span className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-slate-400 font-medium">
-            <span className="h-2 w-2 rounded-full bg-slate-500" />
-            Standard profile
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1 font-medium text-[var(--text-muted)]">
+            <span className="h-2 w-2 rounded-full bg-slate-400" />
+            Baseline FP32
           </span>
         </div>
       </div>
@@ -65,51 +67,57 @@ export const EnergyTimeChart: React.FC<EnergyTimeChartProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
-              <linearGradient id="appleColorOptimized" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="5%" stopColor="#0A84FF" stopOpacity={0.45} />
-              <stop offset="95%" stopColor="#0A84FF" stopOpacity={0.0} />
+              <linearGradient id="chartOptimizedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="5%" stopColor="#0284c7" stopOpacity={0.35} />
+                <stop offset="95%" stopColor="#0284c7" stopOpacity={0.0} />
               </linearGradient>
-              <linearGradient id="appleColorBaseline" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="5%" stopColor="#64748b" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#64748b" stopOpacity={0.0} />
+              <linearGradient id="chartBaselineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-            <XAxis dataKey="time" stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }} />
-            <YAxis stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }} unit="W" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+            <XAxis
+              dataKey="time"
+              stroke="var(--border-subtle)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'monospace' }}
+            />
+            <YAxis
+              stroke="var(--border-subtle)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'monospace' }}
+              unit="W"
+            />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                borderColor: 'rgba(255, 255, 255, 0.12)',
-                borderRadius: '16px',
-                boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                borderColor: 'var(--chart-tooltip-border)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                 fontSize: '12px',
-                color: '#f8fafc',
-                padding: '10px 14px',
+                color: 'var(--chart-tooltip-text)',
+                padding: '8px 12px',
               }}
-              itemStyle={{ color: '#8cc2ff', fontWeight: 600 }}
-              labelStyle={{ color: '#94a3b8', marginBottom: '4px', fontWeight: 500 }}
+              itemStyle={{ color: 'var(--accent-primary)', fontWeight: 600 }}
+              labelStyle={{ color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 500 }}
               formatter={(val: number) => [`${val} W`, 'Power Draw']}
             />
             <Area
               type="monotone"
               dataKey="baseline_power"
-              name="Standard profile"
+              name="Baseline FP32"
               stroke="#64748b"
               strokeWidth={2}
               fillOpacity={1}
-              fill="url(#appleColorBaseline)"
+              fill="url(#chartBaselineGrad)"
             />
             <Area
               type="monotone"
               dataKey="optimized_power"
-              name="Current profile"
-              stroke="#0a84ff"
+              name="Optimized DFS"
+              stroke="#0284c7"
               strokeWidth={2.5}
               fillOpacity={1}
-              fill="url(#appleColorOptimized)"
+              fill="url(#chartOptimizedGrad)"
             />
           </AreaChart>
         </ResponsiveContainer>

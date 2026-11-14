@@ -6,13 +6,13 @@ import {
   ShieldCheck,
   Cpu,
   ArrowRight,
-  TrendingDown,
   Zap,
   Leaf,
   Timer,
   Award,
   Layers,
   Activity,
+  RotateCcw,
 } from 'lucide-react';
 import api from '../services/api';
 import type { OptimizationResult } from '../types';
@@ -33,7 +33,7 @@ interface CandidateConfig {
 const ALL_CANDIDATES: CandidateConfig[] = [
   {
     id: 'resnet18_fp32',
-    name: 'Standard profile',
+    name: 'ResNet-18 FP32 (Baseline)',
     architecture: 'ResNet-18',
     precision: 'FP32',
     accuracy: 93.2,
@@ -45,7 +45,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_fp16',
-    name: 'Fast profile',
+    name: 'ResNet-18 FP16 (Half Precision)',
     architecture: 'ResNet-18',
     precision: 'FP16',
     accuracy: 93.0,
@@ -57,7 +57,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_onnx',
-    name: 'Balanced profile',
+    name: 'ResNet-18 ONNX Runtime',
     architecture: 'ResNet-18',
     precision: 'ONNX',
     accuracy: 93.1,
@@ -69,7 +69,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'resnet18_int8',
-    name: 'Efficient profile',
+    name: 'ResNet-18 INT8 Quantized (PTQ)',
     architecture: 'ResNet-18',
     precision: 'INT8',
     accuracy: 92.4,
@@ -81,7 +81,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_fp32',
-    name: 'Compact profile',
+    name: 'MobileNet-V3 FP32 Baseline',
     architecture: 'MobileNet-V3',
     precision: 'FP32',
     accuracy: 89.6,
@@ -93,7 +93,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_onnx',
-    name: 'Light profile',
+    name: 'MobileNet-V3 ONNX Runtime',
     architecture: 'MobileNet-V3',
     precision: 'ONNX',
     accuracy: 89.4,
@@ -105,7 +105,7 @@ const ALL_CANDIDATES: CandidateConfig[] = [
   },
   {
     id: 'mobilenetv3_int8',
-    name: 'Lowest-energy profile',
+    name: 'MobileNet-V3 INT8 Ultra-Low Power',
     architecture: 'MobileNet-V3',
     precision: 'INT8',
     accuracy: 88.9,
@@ -116,13 +116,6 @@ const ALL_CANDIDATES: CandidateConfig[] = [
     throughput: 795.0,
   },
 ];
-
-const getModeLabel = (precision: CandidateConfig['precision']) => ({
-  FP32: 'Standard',
-  FP16: 'Fast',
-  INT8: 'Efficient',
-  ONNX: 'Balanced',
-}[precision]);
 
 export const OptimizerPage: React.FC = () => {
   // Constraints state
@@ -142,25 +135,35 @@ export const OptimizerPage: React.FC = () => {
 
   const baseline = ALL_CANDIDATES[0]; // ResNet-18 FP32
 
-  // Quick Preset Helper (Apple-style presets)
   const applyPreset = (preset: 'balanced' | 'edge' | 'accurate') => {
     if (preset === 'edge') {
       setMinAccuracy(88.5);
       setMaxLatency(30);
       setMaxMemory(256);
+      setAlphaEnergy(0.5);
+      setBetaLatency(0.3);
+      setGammaAccuracy(0.1);
+      setDeltaMemory(0.1);
     } else if (preset === 'balanced') {
       setMinAccuracy(89.5);
       setMaxLatency(60);
       setMaxMemory(512);
+      setAlphaEnergy(0.4);
+      setBetaLatency(0.3);
+      setGammaAccuracy(0.2);
+      setDeltaMemory(0.1);
     } else if (preset === 'accurate') {
       setMinAccuracy(92.5);
       setMaxLatency(90);
       setMaxMemory(1024);
+      setAlphaEnergy(0.2);
+      setBetaLatency(0.2);
+      setGammaAccuracy(0.5);
+      setDeltaMemory(0.1);
     }
     setApplied(false);
   };
 
-  // Evaluate each available profile against the selected priorities.
   const evaluatedCandidates = useMemo(() => {
     return ALL_CANDIDATES.map((c) => {
       const meetsAcc = c.accuracy >= minAccuracy;
@@ -168,7 +171,7 @@ export const OptimizerPage: React.FC = () => {
       const meetsMem = c.memory_mb <= maxMemory;
       const isFeasible = meetsAcc && meetsLat && meetsMem;
 
-      // Normalized cost: lower is better
+      // Normalized Pareto score (lower is superior)
       const score =
         alphaEnergy * (c.energy_wh / baseline.energy_wh) +
         betaLatency * (c.latency_ms / baseline.latency_ms) +
@@ -186,20 +189,18 @@ export const OptimizerPage: React.FC = () => {
     });
   }, [minAccuracy, maxLatency, maxMemory, alphaEnergy, betaLatency, gammaAccuracy, deltaMemory, baseline]);
 
-  // Find greenest feasible candidate
   const feasibleCandidates = evaluatedCandidates.filter((c) => c.isFeasible);
   const recommended = useMemo(() => {
     if (feasibleCandidates.length === 0) return evaluatedCandidates[0];
     return [...feasibleCandidates].sort((a, b) => a.score - b.score)[0];
   }, [feasibleCandidates, evaluatedCandidates]);
 
-  // Connect to backend API when constraints change
   useEffect(() => {
     let active = true;
     const syncBackend = async () => {
       try {
         await api.optimize({
-          min_accuracy: minAccuracy,
+          min_accuracy: minAccuracy / 100.0,
           max_latency: maxLatency,
           max_memory: maxMemory,
           alpha: alphaEnergy,
@@ -225,385 +226,383 @@ export const OptimizerPage: React.FC = () => {
 
   const handleRunOptimizer = async () => {
     setIsOptimizing(true);
-    setApplied(false);
     try {
       await api.predict({
-        model_name: recommended.architecture,
-        precision: recommended.precision,
+        model_name: recommended.architecture === 'ResNet-18' ? 'resnet18' : 'mobilenetv3',
+        precision: recommended.precision.toLowerCase(),
         batch_size: 32,
       });
+      setApplied(true);
     } catch {
-      // offline fallback
-    }
-    setTimeout(() => {
+      setApplied(true);
+    } finally {
       setIsOptimizing(false);
-    }, 500);
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* Header and Live Status Pill */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-white">Configuration planner</h2>
-            <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
-              Balanced choices
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              Multi-Objective Pareto Optimizer
+            </h1>
+            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
+              {apiSynced ? 'API Synchronized' : 'Local Solver'}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Choose what matters most: energy, time and output quality.
+          <p className="mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
+            Algorithmic selection minimizing loss, latency, Joule consumption, and peak memory allocation
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <span
-            className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold glass-pill transition-colors ${
-              apiSynced
-                ? 'border-emerald-500/30 text-emerald-300'
-                : 'text-slate-400 border-white/10'
-            }`}
+        {/* Preset Selector */}
+        <div className="flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-1 text-xs">
+          <button
+            type="button"
+            onClick={() => applyPreset('edge')}
+            className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            <span className={`h-2 w-2 rounded-full ${apiSynced ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
-            {apiSynced ? 'Connected' : 'Using local data'}
-          </span>
+            Low-Power Edge
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset('balanced')}
+            className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          >
+            Balanced Cloud
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset('accurate')}
+            className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          >
+            High-Accuracy
+          </button>
         </div>
       </div>
 
-      {/* Main Grid: Controls vs Side-by-Side Comparison */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Dynamic Constraint Controls (Apple Settings Card) */}
-        <div className="lg:col-span-1 glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg shadow-black/40 space-y-6">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                <Sliders className="h-4 w-4" />
-              </div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">Your priorities</h3>
+      {/* Main Grid: Controls vs Recommended Candidate */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Controls Column (5 cols) */}
+        <div className="lg:col-span-5 space-y-5">
+          {/* SLA Constraints Card */}
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-[var(--accent-primary)]" />
+                SLA Operational Constraints
+              </h3>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">Hard Bounds</span>
             </div>
-          </div>
 
-          {/* SLA Preset Pills */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-              Presets
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => applyPreset('edge')}
-                className="rounded-xl glass-pill py-2 px-2.5 text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 transition-all text-center"
-              >
-                Fast
-              </button>
-              <button
-                type="button"
-                onClick={() => applyPreset('balanced')}
-                className="rounded-xl glass-pill py-2 px-2.5 text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 transition-all text-center"
-              >
-                Balanced
-              </button>
-              <button
-                type="button"
-                onClick={() => applyPreset('accurate')}
-                className="rounded-xl glass-pill py-2 px-2.5 text-xs font-semibold text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 transition-all text-center"
-              >
-                High quality
-              </button>
-            </div>
-          </div>
-
-          {/* Sliders */}
-          <div className="space-y-5 text-xs">
-            {/* Accuracy Slider */}
+            {/* Min Accuracy Slider */}
             <div>
-              <div className="flex justify-between items-center text-slate-300 mb-1.5">
-                <span className="font-medium">Quality target</span>
-                <span className="font-mono text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                  {minAccuracy.toFixed(1)}%
-                </span>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-medium text-[var(--text-secondary)]">Min Accuracy SLA</span>
+                <span className="font-mono font-semibold text-[var(--text-primary)]">{minAccuracy.toFixed(1)}%</span>
               </div>
               <input
                 type="range"
                 min="85.0"
                 max="94.0"
-                step="0.5"
+                step="0.1"
                 value={minAccuracy}
                 onChange={(e) => {
-                  setMinAccuracy(Number(e.target.value));
+                  setMinAccuracy(parseFloat(e.target.value));
                   setApplied(false);
                 }}
-                className="w-full"
+                className="w-full accent-sky-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
-                <span>Flexible</span>
-                <span>Strict</span>
+              <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
+                <span>85.0%</span>
+                <span>94.0%</span>
               </div>
             </div>
 
-            {/* Latency Slider */}
+            {/* Max Latency Slider */}
             <div>
-              <div className="flex justify-between items-center text-slate-300 mb-1.5">
-                <span className="font-medium">Time limit</span>
-                <span className="font-mono text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                  {maxLatency} ms
-                </span>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-medium text-[var(--text-secondary)]">Max Inference Latency</span>
+                <span className="font-mono font-semibold text-[var(--text-primary)]">{maxLatency} ms</span>
               </div>
               <input
                 type="range"
                 min="15"
                 max="120"
-                step="5"
+                step="1"
                 value={maxLatency}
                 onChange={(e) => {
-                  setMaxLatency(Number(e.target.value));
+                  setMaxLatency(parseInt(e.target.value, 10));
                   setApplied(false);
                 }}
-                className="w-full"
+                className="w-full accent-sky-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+              <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
                 <span>15 ms</span>
                 <span>120 ms</span>
               </div>
             </div>
 
-            {/* Memory Slider */}
+            {/* Max Memory Slider */}
             <div>
-              <div className="flex justify-between items-center text-slate-300 mb-1.5">
-                <span className="font-medium">Memory limit</span>
-                <span className="font-mono text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                  {maxMemory} MB
-                </span>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-medium text-[var(--text-secondary)]">Max Memory Ceiling</span>
+                <span className="font-mono font-semibold text-[var(--text-primary)]">{maxMemory} MB</span>
               </div>
               <input
                 type="range"
                 min="128"
                 max="1500"
-                step="64"
+                step="32"
                 value={maxMemory}
                 onChange={(e) => {
-                  setMaxMemory(Number(e.target.value));
+                  setMaxMemory(parseInt(e.target.value, 10));
                   setApplied(false);
                 }}
-                className="w-full"
+                className="w-full accent-sky-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
+              <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
                 <span>128 MB</span>
                 <span>1500 MB</span>
               </div>
             </div>
           </div>
 
-          {/* Objective Multi-Factor Weights */}
-          <div className="border-t border-white/[0.06] pt-4 space-y-2.5">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              What matters most
-            </h4>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center text-slate-300">
-                <span>Energy ({(alphaEnergy * 100).toFixed(0)}%)</span>
-                <span className="text-emerald-400 font-bold text-[11px] bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30">
-                  Primary
-                </span>
+          {/* Objective Function Weights */}
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
+                <Sliders className="h-4 w-4 text-[var(--accent-primary)]" />
+                Pareto Objective Weights
+              </h3>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                Σ = {(alphaEnergy + betaLatency + gammaAccuracy + deltaMemory).toFixed(1)}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">α Energy Weight</label>
+                <input
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  max="1"
+                  value={alphaEnergy}
+                  onChange={(e) => setAlphaEnergy(parseFloat(e.target.value) || 0)}
+                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1.5 font-mono text-[var(--text-primary)]"
+                />
               </div>
-              <div className="flex justify-between items-center text-slate-400 text-[11px]">
-                <span>Time ({(betaLatency * 100).toFixed(0)}%)</span>
-                <span className="text-slate-300 font-medium">Secondary</span>
+              <div>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">β Latency Weight</label>
+                <input
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  max="1"
+                  value={betaLatency}
+                  onChange={(e) => setBetaLatency(parseFloat(e.target.value) || 0)}
+                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1.5 font-mono text-[var(--text-primary)]"
+                />
               </div>
-              <div className="flex justify-between items-center text-slate-400 text-[11px]">
-                <span>Quality ({(gammaAccuracy * 100).toFixed(0)}%)</span>
-                <span className="text-slate-300 font-medium">Guardrail</span>
+              <div>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">γ Accuracy Weight</label>
+                <input
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  max="1"
+                  value={gammaAccuracy}
+                  onChange={(e) => setGammaAccuracy(parseFloat(e.target.value) || 0)}
+                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1.5 font-mono text-[var(--text-primary)]"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-[var(--text-muted)] block mb-1">δ Memory Weight</label>
+                <input
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  max="1"
+                  value={deltaMemory}
+                  onChange={(e) => setDeltaMemory(parseFloat(e.target.value) || 0)}
+                  className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1.5 font-mono text-[var(--text-primary)]"
+                />
               </div>
             </div>
           </div>
-
-          <button
-            onClick={handleRunOptimizer}
-            disabled={isOptimizing}
-            className="button-primary inline-flex w-full items-center justify-center gap-2 py-3 text-xs font-semibold disabled:opacity-50"
-          >
-            {isOptimizing ? 'Refreshing…' : 'Refresh recommendation'}
-          </button>
         </div>
 
-        {/* Right: Side-by-Side Comparison & Recommendation */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Side-by-Side Comparison Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Left Card: Unoptimized Baseline */}
-            <div className="glass-card rounded-2xl p-5 border border-white/[0.08] shadow-lg relative">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Standard setup
-                </span>
-                <span className="rounded-full glass-pill px-2.5 py-0.5 text-[10px] font-mono text-slate-300">
-                  Standard
-                </span>
+        {/* Recommended Candidate & Empirical Delta (7 cols) */}
+        <div className="lg:col-span-7 space-y-5">
+          {/* Optimal Recommendation Card */}
+          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-sm relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    Optimal Pareto Front Frontier
+                  </span>
+                </div>
+                <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
+                  {recommended.name}
+                </h2>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  Architecture: {recommended.architecture} · Precision: {recommended.precision}
+                </p>
               </div>
 
-              <h4 className="text-base font-bold text-white mb-4">{baseline.name}</h4>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <Award className="h-3.5 w-3.5" />
+                Rank #1
+              </span>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Energy per Run</span>
-                  <span className="text-lg font-bold text-rose-400 font-mono mt-0.5 block">{baseline.energy_wh} Wh</span>
+            {/* Side-by-Side Comparison Metrics */}
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Energy Draw</span>
+                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.energy_wh.toFixed(1)}</span>
+                <span className="text-[10px] text-[var(--text-muted)] ml-1">Wh</span>
+                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                  -{energySavedPct}% vs Base
                 </div>
-                <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Run time</span>
-                  <span className="text-lg font-bold text-rose-400 font-mono mt-0.5 block">{baseline.latency_ms} ms</span>
+              </div>
+
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Mean Latency</span>
+                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.latency_ms}</span>
+                <span className="text-[10px] text-[var(--text-muted)] ml-1">ms</span>
+                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                  -{latencyReductionPct}% vs Base
                 </div>
-                <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Output quality</span>
-                  <span className="text-lg font-bold text-slate-200 font-mono mt-0.5 block">{baseline.accuracy}%</span>
+              </div>
+
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">Accuracy</span>
+                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.accuracy.toFixed(1)}</span>
+                <span className="text-[10px] text-[var(--text-muted)] ml-1">%</span>
+                <div className={`text-[10px] font-medium mt-1 ${parseFloat(accuracyDelta) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                  {accuracyDelta}% delta
                 </div>
-                <div className="rounded-xl glass-pill p-3 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Impact</span>
-                  <span className="text-lg font-bold text-slate-400 font-mono mt-0.5 block">{baseline.co2_g} g</span>
+              </div>
+
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3">
+                <span className="text-[10px] uppercase font-semibold text-[var(--text-muted)] block">CO₂ Footprint</span>
+                <span className="text-xl font-bold text-[var(--text-primary)] font-mono">{recommended.co2_g.toFixed(1)}</span>
+                <span className="text-[10px] text-[var(--text-muted)] ml-1">g</span>
+                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+                  -{co2AvoidedG}g avoided
                 </div>
               </div>
             </div>
 
-            {/* Right Card: Recommended Green Config (Apple Highlight Card) */}
-            <div className="glass-card rounded-2xl p-5 border-2 border-emerald-500/60 bg-gradient-to-br from-emerald-950/40 via-slate-900/60 to-slate-950/80 shadow-[0_0_30px_rgba(10,132,255,0.22)] relative">
-              <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3 mb-3">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  Recommended setup
-                </span>
-                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-mono text-emerald-300 border border-emerald-500/40 font-bold">
-                  {getModeLabel(recommended.precision)}
+            {/* Action Bar */}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-4">
+              <div className="text-xs text-[var(--text-muted)] flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5 text-emerald-500" />
+                <span>
+                  {feasibleCandidates.length} of {ALL_CANDIDATES.length} candidates satisfy hard SLA constraints
                 </span>
               </div>
 
-              <h4 className="text-base font-bold text-white mb-4">{recommended.name}</h4>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">Energy per Run</span>
-                  <span className="text-lg font-bold text-emerald-300 font-mono mt-0.5 block">
-                    {recommended.energy_wh} Wh <span className="text-xs text-emerald-400 font-bold">(-{energySavedPct}%)</span>
-                  </span>
-                </div>
-                <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">Run time</span>
-                  <span className="text-lg font-bold text-white font-mono mt-0.5 block">
-                    {recommended.latency_ms} ms <span className="text-xs text-emerald-400 font-bold">(-{latencyReductionPct}%)</span>
-                  </span>
-                </div>
-                <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Output quality</span>
-                  <span className="text-lg font-bold text-white font-mono mt-0.5 block">
-                    {recommended.accuracy}% <span className="text-xs text-emerald-400">({accuracyDelta}%)</span>
-                  </span>
-                </div>
-                <div className="rounded-xl bg-slate-950/60 p-3 border border-emerald-500/30">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Impact</span>
-                  <span className="text-lg font-bold text-emerald-400 font-mono mt-0.5 block">
-                    {recommended.co2_g} g <span className="text-xs text-emerald-300">(-{co2AvoidedG}g)</span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between border-t border-emerald-500/30 pt-3">
-                <span className="text-[11px] text-emerald-300 font-medium">
-                  Fits your current priorities
-                </span>
-                <button
-                  onClick={() => setApplied(true)}
-                  disabled={applied}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:bg-emerald-400 transition-colors disabled:bg-emerald-800 disabled:text-slate-400"
-                >
-                  {applied ? (
-                    <>
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      Applied
-                    </>
-                  ) : (
-                    <>
-                      Use this profile
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </>
-                  )}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleRunOptimizer}
+                disabled={isOptimizing}
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
+              >
+                {isOptimizing ? 'Profiling Hardware...' : applied ? 'Configuration Applied' : 'Deploy Selected Profile'}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Architecture & Quantization Matrix Table */}
-          <div className="glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg">
-            <div className="mb-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-white">Available profiles</h4>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Options that fit your priorities are shown clearly.
-              </p>
-            </div>
+      {/* Candidate Evaluation Matrix */}
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 sm:p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
+              <Layers className="h-4 w-4 text-[var(--accent-primary)]" />
+              Candidate Profile Evaluation Matrix
+            </h3>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              Multi-criteria assessment against hard constraints and scalarized loss metric
+            </p>
+          </div>
+          <span className="text-xs font-mono text-[var(--text-muted)]">
+            Total Evaluated: {evaluatedCandidates.length}
+          </span>
+        </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-white/[0.06] text-slate-400">
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Profile</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Mode</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Quality</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Time</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Energy</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold">Impact</th>
-                    <th className="py-3 px-3 uppercase tracking-wider text-[10px] font-semibold text-right">Status</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Candidate</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Precision</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Memory</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e (g)</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Feasibility</th>
+                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {evaluatedCandidates.map((c) => {
+                const isSelected = c.id === recommended.id;
+                return (
+                  <tr
+                    key={c.id}
+                    className={`transition-colors ${
+                      isSelected
+                        ? 'bg-sky-500/5 font-medium'
+                        : 'hover:bg-[var(--surface-muted)]'
+                    }`}
+                  >
+                    <td className="py-3 px-3 font-medium text-[var(--text-primary)] flex items-center gap-2">
+                      {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />}
+                      {c.name}
+                    </td>
+                    <td className="py-3 px-3 font-mono text-[var(--text-muted)]">{c.precision}</td>
+                    <td className={`py-3 px-3 font-mono ${c.meetsAcc ? 'text-[var(--text-primary)]' : 'text-rose-500 font-semibold'}`}>
+                      {c.accuracy.toFixed(1)}%
+                    </td>
+                    <td className={`py-3 px-3 font-mono ${c.meetsLat ? 'text-[var(--text-primary)]' : 'text-rose-500 font-semibold'}`}>
+                      {c.latency_ms} ms
+                    </td>
+                    <td className="py-3 px-3 font-mono text-[var(--text-primary)]">{c.energy_wh.toFixed(1)} Wh</td>
+                    <td className={`py-3 px-3 font-mono ${c.meetsMem ? 'text-[var(--text-muted)]' : 'text-rose-500 font-semibold'}`}>
+                      {c.memory_mb} MB
+                    </td>
+                    <td className="py-3 px-3 font-mono text-[var(--text-muted)]">{c.co2_g.toFixed(1)} g</td>
+                    <td className="py-3 px-3">
+                      {c.isFeasible ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          <CheckCircle2 className="h-3 w-3" /> Feasible
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-500">
+                          <AlertTriangle className="h-3 w-3" /> SLA Breach
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono text-[var(--text-secondary)]">
+                      {c.score.toFixed(3)}
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.04] font-mono">
-                  {evaluatedCandidates.map((c) => {
-                    const isRec = c.id === recommended.id;
-                    return (
-                      <tr
-                        key={c.id}
-                        className={`transition-colors ${
-                          isRec
-                            ? 'bg-emerald-500/10 border-l-4 border-l-emerald-400 font-semibold'
-                            : c.isFeasible
-                            ? 'hover:bg-white/[0.02]'
-                            : 'opacity-35 hover:bg-white/[0.01]'
-                        }`}
-                      >
-                        <td className="py-3 px-3 text-white font-sans flex items-center gap-2">
-                          {c.name}
-                          {isRec && (
-                            <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[9px] font-extrabold text-emerald-300 border border-emerald-400/30 uppercase tracking-wider">
-                              Recommended
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-3 text-emerald-400 font-bold">{getModeLabel(c.precision)}</td>
-                        <td className={`py-3 px-3 ${!c.meetsAcc ? 'text-rose-400' : 'text-slate-200'}`}>
-                          {c.accuracy}%
-                        </td>
-                        <td className={`py-3 px-3 ${!c.meetsLat ? 'text-rose-400' : 'text-slate-200'}`}>
-                          {c.latency_ms} ms
-                        </td>
-                        <td className="py-3 px-3 text-emerald-300">{c.energy_wh} Wh</td>
-                        <td className="py-3 px-3 text-slate-400">{c.co2_g} g</td>
-                        <td className="py-3 px-3 text-right font-sans">
-                          {isRec ? (
-                            <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/40">
-                              RECOMMENDED
-                            </span>
-                          ) : c.isFeasible ? (
-                            <span className="text-[10px] text-teal-300 bg-teal-500/15 px-2 py-0.5 rounded-full border border-teal-500/30">
-                              AVAILABLE
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-rose-300 bg-rose-500/15 px-2 py-0.5 rounded-full border border-rose-500/30">
-                              {!c.meetsAcc ? 'Quality' : !c.meetsLat ? 'Time' : 'Unavailable'}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StatusBadge from '../components/StatusBadge';
-import { PlusCircle, Search, Filter, Layers, RefreshCw, X } from 'lucide-react';
+import Modal from '../components/ui/Modal';
+import Button from '../components/ui/Button';
+import { PlusCircle, Search, Filter, Layers, RefreshCw, X, Cpu, Clock, Zap, Leaf } from 'lucide-react';
+import api from '../services/api';
 import type { Workload } from '../types';
 
-const mockWorkloads: Workload[] = [
+const fallbackWorkloads: Workload[] = [
   {
     id: 'WL-1001',
-    name: 'Product image review',
-    model_type: 'Image processing',
+    name: 'ResNet-18 ImageNet Validation',
+    model_type: 'Computer Vision',
     status: 'completed',
     energy_wh: 14.8,
     carbon_g: 12.1,
@@ -17,8 +20,8 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1002',
-    name: 'Customer note review',
-    model_type: 'Text processing',
+    name: 'BERT-Base Sentiment Evaluation',
+    model_type: 'NLP Transformer',
     status: 'completed',
     energy_wh: 22.4,
     carbon_g: 18.3,
@@ -28,19 +31,19 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1003',
-    name: 'Monthly content export',
-    model_type: 'Batch processing',
+    name: 'MobileNet-V3 Batch Profiling',
+    model_type: 'Edge Vision',
     status: 'running',
-    energy_wh: 248.6,
-    carbon_g: 203.8,
-    latency_ms: 420,
+    energy_wh: 6.8,
+    carbon_g: 5.5,
+    latency_ms: 18,
     accuracy: 89.4,
     created_at: '2026-11-13T11:45:00Z',
   },
   {
     id: 'WL-1004',
-    name: 'Audio archive',
-    model_type: 'Audio processing',
+    name: 'Whisper-Small Speech Transcribe',
+    model_type: 'Audio Processing',
     status: 'pending',
     energy_wh: 0,
     carbon_g: 0,
@@ -50,42 +53,72 @@ const mockWorkloads: Workload[] = [
   },
   {
     id: 'WL-1005',
-    name: 'Video catalogue',
-    model_type: 'Media processing',
+    name: 'Stable Diffusion Latent Probe',
+    model_type: 'Generative AI',
     status: 'completed',
-    energy_wh: 31.2,
-    carbon_g: 25.5,
-    latency_ms: 22,
+    energy_wh: 84.2,
+    carbon_g: 68.9,
+    latency_ms: 380,
     accuracy: 88.5,
     created_at: '2026-11-13T08:10:00Z',
   },
 ];
 
 export const WorkloadPage: React.FC = () => {
-  const [workloads, setWorkloads] = useState<Workload[]>(mockWorkloads);
+  const [workloads, setWorkloads] = useState<Workload[]>(fallbackWorkloads);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
     name: '',
-    model_type: 'Image processing',
+    model_type: 'Computer Vision',
     dataset: '',
     precision: 'INT8',
     min_accuracy: 90,
     max_latency: 100,
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const loadWorkloads = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await api.getWorkloads();
+      if (res.data && res.data.length > 0) {
+        setWorkloads(res.data);
+      }
+    } catch {
+      // retain current state
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWorkloads();
+  }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const res = await api.submitWorkload({
+        name: formData.name || 'Untitled Benchmark Workload',
+        model_type: formData.model_type,
+        dataset: formData.dataset || undefined,
+      });
+
+      if (res.data) {
+        setWorkloads([res.data, ...workloads]);
+      }
+    } catch {
+      // Local fallback addition
       const newWorkload: Workload = {
         id: `WL-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: formData.name || 'New run',
+        name: formData.name || 'New ML Benchmark Run',
         model_type: formData.model_type,
         status: 'running',
         energy_wh: 18.5,
@@ -95,128 +128,195 @@ export const WorkloadPage: React.FC = () => {
         created_at: new Date().toISOString(),
       };
       setWorkloads([newWorkload, ...workloads]);
+    } finally {
       setIsSubmitting(false);
       setShowModal(false);
       setFormData({
         name: '',
-        model_type: 'Image processing',
+        model_type: 'Computer Vision',
         dataset: '',
         precision: 'INT8',
         min_accuracy: 90,
         max_latency: 100,
       });
-    }, 600);
+    }
   };
 
   const filteredWorkloads = workloads.filter((w) => {
     const matchesSearch =
       w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      w.id.toLowerCase().includes(searchTerm.toLowerCase());
+      w.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      w.model_type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || w.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  return (
-    <div className="space-y-6">
-      {/* Top Banner and Actions */}
-      <div className="relative overflow-hidden rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                Runs
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Keep every run in view.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-              Create a run, then follow its energy use and progress in one place.
-            </p>
-          </div>
+  const totalEnergy = workloads.reduce((acc, curr) => acc + (curr.energy_wh || 0), 0);
+  const totalCarbon = workloads.reduce((acc, curr) => acc + (curr.carbon_g || 0), 0);
 
-          <button
-            onClick={() => setShowModal(true)}
-            className="button-primary inline-flex items-center gap-2 px-5 py-3 text-xs font-semibold cursor-pointer self-start sm:self-auto"
+  return (
+    <div className="space-y-6 pb-8">
+      {/* Header and Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              Machine Learning Workload Registry
+            </h1>
+            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300">
+              {workloads.length} Workloads Registered
+            </span>
+          </div>
+          <p className="mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
+            Lifecycle monitoring, real-time power profiling, and empirical emissions traces for model runs
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadWorkloads}
+            disabled={isRefreshing}
+            leftIcon={<RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />}
           >
-            <PlusCircle className="h-4 w-4" />
-            <span>New run</span>
-          </button>
+            Refresh
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowModal(true)}
+            leftIcon={<PlusCircle className="h-3.5 w-3.5" />}
+          >
+            Submit Workload
+          </Button>
         </div>
       </div>
 
-      {/* Filter and Search Bar (Apple Segmented Style) */}
-      <div className="flex flex-col sm:flex-row gap-3 rounded-2xl glass-card p-4 border border-white/[0.08] shadow-lg">
+      {/* Aggregate KPI Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            Total Workload Trace
+          </span>
+          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono mt-1 block">
+            {workloads.length}
+          </span>
+          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
+            {workloads.filter((w) => w.status === 'completed').length} completed
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            Active Executions
+          </span>
+          <span className="text-2xl font-bold text-sky-600 dark:text-sky-400 font-mono mt-1 block">
+            {workloads.filter((w) => w.status === 'running').length}
+          </span>
+          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
+            Inference / Training Jobs
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            Cumulative Energy
+          </span>
+          <span className="text-2xl font-bold text-[var(--text-primary)] font-mono mt-1 block">
+            {totalEnergy.toFixed(1)}
+          </span>
+          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
+            Watt-hours dissipation
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-sm">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] block">
+            Quantified Carbon
+          </span>
+          <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-1 block">
+            {totalCarbon.toFixed(1)}
+          </span>
+          <span className="text-xs text-[var(--text-muted)] mt-0.5 block">
+            Grams CO₂e emitted
+          </span>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3 shadow-sm">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)]" />
           <input
             type="text"
-            placeholder="Search by name or ID..."
+            placeholder="Search workloads by ID, name, or architecture..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl glass-pill py-2.5 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 border border-white/[0.06] focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+            className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] py-1.5 pl-9 pr-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl glass-pill px-3.5 py-2.5 text-xs text-slate-200 border border-white/[0.06] focus:border-emerald-500/50 focus:outline-none cursor-pointer bg-slate-900"
-          >
-            <option value="all">All Statuses ({workloads.length})</option>
-            <option value="completed">Completed</option>
-            <option value="running">Running</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-          </select>
+        <div className="flex items-center gap-1.5">
+          <Filter className="h-3.5 w-3.5 text-[var(--text-muted)] ml-1" />
+          <span className="text-xs text-[var(--text-muted)] mr-1">Status:</span>
+          {(['all', 'completed', 'running', 'pending', 'failed'] as const).map((st) => (
+            <button
+              key={st}
+              onClick={() => setStatusFilter(st)}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition-colors cursor-pointer ${
+                statusFilter === st
+                  ? 'bg-[var(--accent-primary)] text-white shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
+              }`}
+            >
+              {st}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Workload History Table */}
-      <div className="overflow-hidden rounded-3xl glass-card border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
+      {/* Workload Table */}
+      <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-white/[0.06] text-slate-400 bg-white/[0.02]">
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Run</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Activity</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Impact</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Duration</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px]">Quality</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[10px] text-right">Created</th>
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Workload ID</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Task &amp; Model</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Status</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Energy (Wh)</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Emissions (g CO₂e)</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Mean Latency</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
+                <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[10px] text-right">Created At</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-[var(--border-subtle)]">
               {filteredWorkloads.map((wl) => (
-                <tr key={wl.id} className="hover:bg-white/[0.03] transition-colors">
-                  <td className="px-6 py-4 font-mono font-medium text-emerald-400">{wl.id}</td>
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-white">{wl.name}</div>
-                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">{wl.model_type}</div>
+                <tr key={wl.id} className="hover:bg-[var(--surface-muted)] transition-colors">
+                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
+                  <td className="py-3.5 px-4">
+                    <div className="font-medium text-[var(--text-primary)]">{wl.name}</div>
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono">{wl.model_type}</span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="py-3.5 px-4">
                     <StatusBadge status={wl.status} />
                   </td>
-                  <td className="px-6 py-4 font-mono font-semibold text-emerald-300">
-                    {wl.energy_wh > 0 ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
+                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--text-primary)]">
+                    {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
                   </td>
-                  <td className="px-6 py-4 font-mono text-slate-300">
-                    {wl.carbon_g > 0 ? `${wl.carbon_g.toFixed(1)} g CO₂` : '—'}
+                  <td className="py-3.5 px-4 font-mono text-[var(--text-muted)]">
+                    {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
                   </td>
-                  <td className="px-6 py-4 font-mono text-slate-300">
-                    {wl.latency_ms > 0 ? `${wl.latency_ms} ms` : '—'}
+                  <td className="py-3.5 px-4 font-mono text-[var(--text-muted)]">
+                    {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
                   </td>
-                  <td className="px-6 py-4 font-mono text-slate-300">
-                    {wl.accuracy > 0 ? `${wl.accuracy.toFixed(1)}%` : '—'}
+                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--text-primary)]">
+                    {wl.accuracy ? `${wl.accuracy.toFixed(1)}%` : '—'}
                   </td>
-                  <td className="px-6 py-4 text-right text-slate-400 font-mono text-[11px]">
-                    {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <td className="py-3.5 px-4 text-right text-[var(--text-muted)] text-[11px] font-mono">
+                    {new Date(wl.created_at).toLocaleDateString()} {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>
               ))}
@@ -225,131 +325,78 @@ export const WorkloadPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal for Submitting New Workload (Apple Sheet Style) */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md transition-opacity">
-          <div className="w-full max-w-lg rounded-3xl glass-card bg-[#0b0f19]/95 p-6 sm:p-7 border border-white/[0.12] shadow-2xl relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                  <Layers className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">Create a run</h3>
-                  <p className="text-[11px] text-slate-400">A few details are all you need.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="rounded-full p-1.5 text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+      {/* Submit Workload Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Submit New ML Workload"
+        size="md"
+      >
+        <form onSubmit={handleCreate} className="space-y-4 text-xs">
+          <div>
+            <label className="block text-[var(--text-secondary)] font-medium mb-1">Workload Name</label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. ResNet-50 ImageNet Profiling"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[var(--text-secondary)] font-medium mb-1">Model Architecture</label>
+              <select
+                value={formData.model_type}
+                onChange={(e) => setFormData({ ...formData, model_type: e.target.value })}
+                className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <option value="Computer Vision">Computer Vision (ResNet / ViT)</option>
+                <option value="Edge Vision">Edge Vision (MobileNet-V3)</option>
+                <option value="NLP Transformer">NLP Transformer (BERT / RoBERTa)</option>
+                <option value="Audio Processing">Audio Processing (Whisper)</option>
+                <option value="Generative AI">Generative AI (Diffusion / LLM)</option>
+              </select>
             </div>
 
-            <form onSubmit={handleCreate} className="mt-5 space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-slate-300 mb-1.5">Run name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Product image review"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-medium text-slate-300 mb-1.5">Activity type</label>
-                  <select
-                    value={formData.model_type}
-                    onChange={(e) => setFormData({ ...formData, model_type: e.target.value })}
-                    className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none bg-slate-900"
-                  >
-                    <option value="Image processing">Image processing</option>
-                    <option value="Text processing">Text processing</option>
-                    <option value="Content generation">Content generation</option>
-                    <option value="Audio processing">Audio processing</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-medium text-slate-300 mb-1.5">Run profile</label>
-                  <select
-                    value={formData.precision}
-                    onChange={(e) => setFormData({ ...formData, precision: e.target.value })}
-                    className="w-full rounded-xl glass-pill p-3 text-white border border-white/[0.08] focus:border-emerald-500 focus:outline-none bg-slate-900"
-                  >
-                    <option value="INT8">Efficient</option>
-                    <option value="ONNX">Balanced</option>
-                    <option value="FP16">Fast</option>
-                    <option value="FP32">Standard</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="font-medium text-slate-300">Quality target</label>
-                    <span className="font-mono text-emerald-400 font-bold">{formData.min_accuracy}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="80"
-                    max="99"
-                    value={formData.min_accuracy}
-                    onChange={(e) => setFormData({ ...formData, min_accuracy: Number(e.target.value) })}
-                    className="w-full accent-emerald-500 cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="font-medium text-slate-300">Time limit</label>
-                    <span className="font-mono text-emerald-400 font-bold">{formData.max_latency} ms</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="10"
-                    max="500"
-                    value={formData.max_latency}
-                    onChange={(e) => setFormData({ ...formData, max_latency: Number(e.target.value) })}
-                    className="w-full accent-emerald-500 cursor-pointer"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-2xl glass-pill p-3.5 border border-emerald-500/30 text-[11px] text-emerald-300 flex items-start gap-2.5">
-                <Layers className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span>
-                  We’ll use your preferences to choose a balanced way to run this task.
-                </span>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-white/[0.08]">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="rounded-xl glass-pill px-4 py-2.5 text-slate-300 hover:text-white transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="button-primary inline-flex items-center gap-2 px-5 py-2.5 font-semibold cursor-pointer disabled:opacity-50"
-                >
-                  {isSubmitting && <RefreshCw className="h-3.5 w-3.5 animate-spin" />}
-                  Create run
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block text-[var(--text-secondary)] font-medium mb-1">Precision Profile</label>
+              <select
+                value={formData.precision}
+                onChange={(e) => setFormData({ ...formData, precision: e.target.value })}
+                className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
+              >
+                <option value="INT8">INT8 Quantized (Post-Training)</option>
+                <option value="ONNX">ONNX Runtime Optimized</option>
+                <option value="FP16">FP16 Half-Precision</option>
+                <option value="FP32">FP32 Unconstrained Baseline</option>
+              </select>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-[var(--text-secondary)] font-medium mb-1">Dataset Identifier (Optional)</label>
+            <input
+              type="text"
+              placeholder="e.g. ImageNet-1K / GLUE-SST2"
+              value={formData.dataset}
+              onChange={(e) => setFormData({ ...formData, dataset: e.target.value })}
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-primary)] focus:outline-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--border-subtle)]">
+            <Button variant="ghost" size="sm" type="button" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Registering...' : 'Dispatch Workload'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

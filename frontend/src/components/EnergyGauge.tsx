@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Activity } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 interface EnergyGaugeProps {
   currentPower: number; // Watts
@@ -20,42 +20,39 @@ export const EnergyGauge: React.FC<EnergyGaugeProps> = ({
   const strokeDashoffset = arcLength - (arcLength * percentage) / 100;
 
   return (
-    <div className="glass-card flex min-h-[330px] flex-col items-center justify-between p-5 sm:p-6">
-      <div className="mb-2 flex w-full items-center justify-between border-b border-white/[0.07] pb-3">
+    <div className="flex min-h-[330px] flex-col items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
+      <div className="mb-2 flex w-full items-center justify-between border-b border-[var(--border-subtle)] pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-500/10 text-emerald-400">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--accent-primary)]">
             <Zap className="h-4 w-4" />
           </div>
-          <span className="text-xs font-semibold tracking-tight text-white">
-            Power right now
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+            Active Power Draw
           </span>
         </div>
-        <span className="glass-pill rounded-full px-2.5 py-0.5 text-[10px] font-medium text-emerald-200">
-          Live reading
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Live Telemetry
         </span>
       </div>
 
-      <div className="relative flex items-center justify-center my-auto">
-        <svg className="w-52 h-52 -rotate-[210deg] transform" viewBox="0 0 200 200">
+      <div className="relative my-auto flex items-center justify-center">
+        <svg className="h-52 w-52 -rotate-[210deg] transform" viewBox="0 0 200 200">
           <defs>
-            <linearGradient id="appleEnergyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#8cc2ff" />
-              <stop offset="60%" stopColor="#0a84ff" />
-              <stop offset="100%" stopColor="#5e5ce6" />
+            <linearGradient id="scientificEnergyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#38bdf8" />
+              <stop offset="60%" stopColor="#2563eb" />
+              <stop offset="100%" stopColor="#4f46e5" />
             </linearGradient>
-            <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
           </defs>
 
-          {/* Background Track */}
+          {/* Background Track (uses theme-aware subtle border/track) */}
           <circle
             cx="100"
             cy="100"
             r={radius}
             fill="transparent"
-            stroke="rgba(255, 255, 255, 0.06)"
+            stroke="var(--border-subtle)"
             strokeWidth={strokeWidth}
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeLinecap="round"
@@ -67,34 +64,33 @@ export const EnergyGauge: React.FC<EnergyGaugeProps> = ({
             cy="100"
             r={radius}
             fill="transparent"
-            stroke="url(#appleEnergyGradient)"
+            stroke="url(#scientificEnergyGradient)"
             strokeWidth={strokeWidth}
             strokeDasharray={`${arcLength} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            filter="url(#gaugeGlow)"
             className="transition-all duration-300 ease-out"
           />
         </svg>
 
         {/* Center Digital Readout */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span className="text-4xl font-semibold text-white tracking-[-0.05em] tabular-nums">
+          <span className="text-4xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums">
             {currentPower.toFixed(1)}
           </span>
-          <span className="mt-0.5 text-xs font-semibold tracking-[0.14em] text-emerald-400">
+          <span className="mt-0.5 text-xs font-semibold tracking-widest text-[var(--accent-primary)]">
             WATTS
           </span>
-          <span className="text-[10px] text-slate-400 uppercase tracking-widest mt-1">
-            Current draw
+          <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+            Instantaneous Load
           </span>
         </div>
       </div>
 
-      <div className="glass-pill flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-xs">
-        <span className="text-slate-400 font-medium">Available capacity ({maxPower}W)</span>
-        <span className="font-mono font-bold text-emerald-300">
-          {percentage.toFixed(0)}% Utilized
+      <div className="flex w-full items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-4 py-2.5 text-xs">
+        <span className="text-[var(--text-muted)] font-medium">Headroom ({maxPower}W Max)</span>
+        <span className="font-mono font-semibold text-[var(--text-primary)]">
+          {percentage.toFixed(0)}% Capacity
         </span>
       </div>
     </div>

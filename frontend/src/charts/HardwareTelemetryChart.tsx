@@ -9,7 +9,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Cpu, Activity } from 'lucide-react';
 import type { HardwareReading } from '../types';
 
 interface HardwareTelemetryChartProps {
@@ -19,7 +18,7 @@ interface HardwareTelemetryChartProps {
 
 export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
   data,
-  title = 'Power readings over time',
+  title = 'Hardware Sensor Telemetry (ESP32-S3 / INA219 Direct Bus)',
 }) => {
   const [selectedChannel, setSelectedChannel] = useState<'all' | 'power' | 'current' | 'voltage' | 'energy'>('all');
 
@@ -44,7 +43,7 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
   }));
 
   const channels = [
-    { id: 'all', label: 'All readings' },
+    { id: 'all', label: 'All Channels' },
     { id: 'power', label: 'Power (W)' },
     { id: 'current', label: 'Current (mA)' },
     { id: 'voltage', label: 'Voltage (V)' },
@@ -52,27 +51,29 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
   ] as const;
 
   return (
-    <div className="rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)] relative overflow-hidden">
-      {/* Background ambient glow */}
-      <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-
-      <div className="relative mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
+      <div className="mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>
+          <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+            {title}
+          </h3>
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+            High-frequency shunt telemetry sampled at 10Hz via I2C instrumentation
+          </p>
         </div>
 
-        {/* Channel Segmented Control (Apple Glass Pills) */}
-        <div className="flex flex-wrap items-center gap-1 rounded-2xl glass-pill p-1 border border-white/[0.08] text-xs">
+        {/* Channel Segmented Control */}
+        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-1 text-xs">
           {channels.map((ch) => {
             const active = selectedChannel === ch.id;
             return (
               <button
                 key={ch.id}
                 onClick={() => setSelectedChannel(ch.id)}
-                className={`rounded-xl px-3 py-1.5 font-semibold transition-all duration-200 cursor-pointer ${
+                className={`rounded-md px-3 py-1 font-medium transition-all duration-150 cursor-pointer ${
                   active
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-950/40'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-[var(--surface-card)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {ch.label}
@@ -85,20 +86,20 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.04)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
             <XAxis
               dataKey="time"
-              stroke="#64748b"
-              tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
+              stroke="var(--border-subtle)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'monospace' }}
               axisLine={false}
               tickLine={false}
             />
 
-            {/* Primary Left YAxis: Power or Current */}
+            {/* Primary Left YAxis */}
             <YAxis
               yAxisId="primary"
-              stroke="#0A84FF"
-              tick={{ fill: '#8CC2FF', fontSize: 10, fontFamily: 'monospace' }}
+              stroke="#0284c7"
+              tick={{ fill: '#0284c7', fontSize: 10, fontFamily: 'monospace' }}
               unit={
                 selectedChannel === 'current'
                   ? ' mA'
@@ -113,13 +114,13 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
               tickLine={false}
             />
 
-            {/* Secondary Right YAxis for Multi-channel view */}
+            {/* Secondary Right YAxis */}
             {selectedChannel === 'all' && (
               <YAxis
                 yAxisId="secondary"
                 orientation="right"
-                stroke="#38BDF8"
-                tick={{ fill: '#7dd3fc', fontSize: 10, fontFamily: 'monospace' }}
+                stroke="#0ea5e9"
+                tick={{ fill: '#0ea5e9', fontSize: 10, fontFamily: 'monospace' }}
                 unit=" mA"
                 axisLine={false}
                 tickLine={false}
@@ -128,19 +129,18 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
 
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.92)',
-                backdropFilter: 'blur(16px)',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '1rem',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                borderColor: 'var(--chart-tooltip-border)',
+                borderRadius: '8px',
                 fontSize: '12px',
-                color: '#F8FAFC',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
-                padding: '10px 14px',
+                color: 'var(--chart-tooltip-text)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                padding: '8px 12px',
               }}
             />
             <Legend
               wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-              formatter={(value) => <span className="text-slate-300 font-medium capitalize">{value}</span>}
+              formatter={(value) => <span className="text-[var(--text-secondary)] font-medium capitalize">{value}</span>}
             />
 
             {(selectedChannel === 'all' || selectedChannel === 'power') && (
@@ -148,11 +148,11 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 yAxisId="primary"
                 type="monotone"
                 dataKey="power_w"
-                name="Power Draw (W)"
-                stroke="#0A84FF"
-                strokeWidth={3}
+                name="Power Dissipation (W)"
+                stroke="#0284c7"
+                strokeWidth={2.5}
                 dot={false}
-                activeDot={{ r: 5, fill: '#8CC2FF', stroke: '#003b76', strokeWidth: 2 }}
+                activeDot={{ r: 4, fill: '#0284c7' }}
               />
             )}
 
@@ -161,11 +161,11 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 yAxisId={selectedChannel === 'all' ? 'secondary' : 'primary'}
                 type="monotone"
                 dataKey="current_ma"
-                name="Current (mA)"
-                stroke="#38BDF8"
-                strokeWidth={2.5}
+                name="Bus Current (mA)"
+                stroke="#0ea5e9"
+                strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 5, fill: '#38BDF8' }}
+                activeDot={{ r: 4, fill: '#0ea5e9' }}
               />
             )}
 
@@ -174,9 +174,9 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 yAxisId="primary"
                 type="monotone"
                 dataKey="voltage_v"
-                name="Bus Voltage (V)"
-                stroke="#FBBF24"
-                strokeWidth={2}
+                name="Rail Voltage (V)"
+                stroke="#d97706"
+                strokeWidth={1.75}
                 strokeDasharray="4 4"
                 dot={false}
               />
@@ -188,8 +188,8 @@ export const HardwareTelemetryChart: React.FC<HardwareTelemetryChartProps> = ({
                 type="monotone"
                 dataKey="energy_wh"
                 name="Accumulated Energy (Wh)"
-                stroke="#A78BFA"
-                strokeWidth={2.5}
+                stroke="#8b5cf6"
+                strokeWidth={2}
                 dot={false}
               />
             )}

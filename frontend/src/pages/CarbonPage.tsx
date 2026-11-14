@@ -21,7 +21,7 @@ export const CarbonPage: React.FC = () => {
   // Scheduler parameters
   const [currentHour] = useState<number>(10); // 10:00 AM Current Time
   const [durationHours, setDurationHours] = useState<number>(2);
-  const [deadlineHours, setDeadlineHours] = useState<number>(10); // within 10 hours (by 20:00 / 8:00 PM)
+  const [deadlineHours, setDeadlineHours] = useState<number>(10); // within 10 hours (by 20:00)
   const [workloadEnergyKwh, setWorkloadEnergyKwh] = useState<number>(4.8); // 4.8 kWh batch training job
   const [scheduled, setScheduled] = useState(false);
   const [apiDispatched, setApiDispatched] = useState(false);
@@ -88,293 +88,187 @@ export const CarbonPage: React.FC = () => {
       });
       setApiDispatched(true);
     } catch {
-      // offline fallback
-      setApiDispatched(true);
+      setApiDispatched(false);
     }
+    setTimeout(() => setScheduled(false), 3000);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Hero Glass Banner */}
-      <div className="relative overflow-hidden rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)]">
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                Grid planning
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Choose a better time to run.
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              See when regional electricity is cleaner, then plan your next run with confidence.
-            </p>
+    <div className="space-y-6 pb-8">
+      {/* Header and Region Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              Regional Grid Carbon Intelligence &amp; Dispatch
+            </h1>
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              CEA Baseline v19: Odisha Grid
+            </span>
           </div>
-
-          <div className="flex items-center gap-2 rounded-2xl glass-pill px-4 py-2 border border-white/[0.08] text-xs">
-            <MapPin className="h-4 w-4 text-emerald-400" />
-            <div className="leading-tight">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Region</span>
-              <span className="font-semibold text-white">Odisha</span>
-            </div>
-          </div>
+          <p className="mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
+            Diurnal marginal emission accounting and temporal workload shifting for zero-performance-penalty decarbonization
+          </p>
         </div>
       </div>
 
-      {/* Grid Highlights (Apple Activity Style Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div className="rounded-3xl glass-card p-5 border border-white/[0.08] shadow-lg relative overflow-hidden">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Grid estimate now</span>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-white font-mono tracking-tight">0.78</span>
-            <span className="text-xs text-amber-400 font-mono font-semibold">kg CO₂e/kWh</span>
+      {/* Main Grid: Scheduler Parameters vs Window Comparison */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Scheduler Controls (5 cols) */}
+        <div className="lg:col-span-5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-[var(--accent-primary)]" />
+              Temporal Dispatch Planner
+            </h3>
+            <span className="text-[10px] text-[var(--text-muted)] font-mono">Real-Time Solver</span>
           </div>
-          <span className="text-[11px] text-slate-400 mt-2 block">Current regional mix</span>
-        </div>
 
-        <div className="rounded-3xl glass-card p-5 border border-emerald-500/40 bg-gradient-to-br from-emerald-500/15 via-transparent to-transparent shadow-[0_0_30px_rgba(10,132,255,0.18)] relative overflow-hidden">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <Sun className="h-3.5 w-3.5 text-emerald-400" />
-            Cleaner period
-          </span>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-emerald-300 font-mono tracking-tight">0.54</span>
-            <span className="text-xs text-emerald-400 font-mono font-semibold">kg CO₂e/kWh</span>
-          </div>
-          <span className="text-[11px] text-emerald-300/80 mt-2 block">Usually lower from 11:00 – 15:00</span>
-        </div>
-
-        <div className="rounded-3xl glass-card p-5 border border-rose-500/30 shadow-lg relative overflow-hidden">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-            <Flame className="h-3.5 w-3.5 text-rose-400" />
-            Peak period
-          </span>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-rose-400 font-mono tracking-tight">0.98</span>
-            <span className="text-xs text-rose-300 font-mono font-semibold">kg CO₂e/kWh</span>
-          </div>
-          <span className="text-[11px] text-slate-400 mt-2 block">Usually higher from 18:00 – 21:00</span>
-        </div>
-
-        <div className="rounded-3xl glass-card p-5 border border-white/[0.08] shadow-lg relative overflow-hidden">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <TrendingDown className="h-3.5 w-3.5 text-emerald-400" />
-            Potential difference
-          </span>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">-44.9%</span>
-            <span className="text-xs text-emerald-300 font-semibold">Emissions</span>
-          </div>
-          <span className="text-[11px] text-slate-400 mt-2 block">Cleaner period compared with peak time</span>
-        </div>
-      </div>
-
-      {/* Interactive 24-Hour Carbon Schedule Chart (Odisha vs National Average) */}
-      <CarbonScheduleChart
-        optimalWindow={{ startHour: optimalWindow.startHour, endHour: optimalWindow.endHour }}
-        immediateWindow={{ startHour: immediateWindow.startHour, endHour: immediateWindow.endHour }}
-      />
-
-      {/* Workload Execution Scheduler & Tradeoff Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Scheduler Controls */}
-        <div className="lg:col-span-1 rounded-3xl glass-card p-6 border border-white/[0.08] shadow-lg space-y-5">
-          <div className="flex items-center gap-2.5 border-b border-white/[0.06] pb-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-              <Calendar className="h-4 w-4" />
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="font-medium text-[var(--text-secondary)]">Estimated Run Duration</span>
+              <span className="font-mono font-semibold text-[var(--text-primary)]">{durationHours} hours</span>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Choose a time</h3>
-              <p className="text-[11px] text-slate-400">Adjust a few details for this run.</p>
+            <input
+              type="range"
+              min="1"
+              max="8"
+              step="1"
+              value={durationHours}
+              onChange={(e) => setDurationHours(parseInt(e.target.value, 10))}
+              className="w-full accent-sky-500 cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
+              <span>1 hr</span>
+              <span>8 hrs</span>
             </div>
           </div>
 
-          <div className="space-y-4 text-xs">
-            {/* Workload Duration */}
-            <div>
-              <div className="flex justify-between items-center text-slate-300 mb-2">
-                <span className="font-medium text-slate-400">Run length</span>
-                <span className="rounded-full glass-pill px-2.5 py-0.5 text-emerald-300 font-mono font-bold">
-                  {durationHours} Hours
-                </span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="6"
-                step="1"
-                value={durationHours}
-                onChange={(e) => {
-                  setDurationHours(Number(e.target.value));
-                  setScheduled(false);
-                }}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="font-medium text-[var(--text-secondary)]">SLA Completion Deadline</span>
+              <span className="font-mono font-semibold text-[var(--text-primary)]">Within {deadlineHours} hours</span>
             </div>
-
-            {/* Deadline Hours */}
-            <div>
-              <div className="flex justify-between items-center text-slate-300 mb-2">
-                <span className="font-medium text-slate-400">Finish by</span>
-                <span className="rounded-full glass-pill px-2.5 py-0.5 text-emerald-300 font-mono font-bold">
-                  Within {deadlineHours}h (by {(currentHour + deadlineHours) % 24}:00)
-                </span>
-              </div>
-              <input
-                type="range"
-                min="3"
-                max="14"
-                step="1"
-                value={deadlineHours}
-                onChange={(e) => {
-                  setDeadlineHours(Number(e.target.value));
-                  setScheduled(false);
-                }}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
+            <input
+              type="range"
+              min="2"
+              max="24"
+              step="1"
+              value={deadlineHours}
+              onChange={(e) => setDeadlineHours(Math.max(durationHours, parseInt(e.target.value, 10)))}
+              className="w-full accent-sky-500 cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
+              <span>2 hrs</span>
+              <span>24 hrs</span>
             </div>
+          </div>
 
-            {/* Workload Energy Consumption */}
-            <div>
-              <div className="flex justify-between items-center text-slate-300 mb-2">
-                <span className="font-medium text-slate-400">Expected energy</span>
-                <span className="rounded-full glass-pill px-2.5 py-0.5 text-emerald-300 font-mono font-bold">
-                  {workloadEnergyKwh.toFixed(1)} kWh
-                </span>
-              </div>
-              <input
-                type="range"
-                min="1.0"
-                max="20.0"
-                step="0.5"
-                value={workloadEnergyKwh}
-                onChange={(e) => {
-                  setWorkloadEnergyKwh(Number(e.target.value));
-                  setScheduled(false);
-                }}
-                className="w-full accent-emerald-500 cursor-pointer"
-              />
+          <div>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="font-medium text-[var(--text-secondary)]">Workload Energy Required</span>
+              <span className="font-mono font-semibold text-[var(--text-primary)]">{workloadEnergyKwh.toFixed(1)} kWh</span>
             </div>
+            <input
+              type="range"
+              min="0.5"
+              max="20.0"
+              step="0.5"
+              value={workloadEnergyKwh}
+              onChange={(e) => setWorkloadEnergyKwh(parseFloat(e.target.value))}
+              className="w-full accent-sky-500 cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">
+              <span>0.5 kWh</span>
+              <span>20.0 kWh</span>
+            </div>
+          </div>
 
+          <div className="border-t border-[var(--border-subtle)] pt-4">
             <button
+              type="button"
               onClick={handleDispatchSchedule}
-              className="button-primary inline-flex w-full items-center justify-center gap-2 py-3 text-xs font-semibold cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-primary)] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition-all cursor-pointer"
             >
-              {scheduled ? (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  Scheduled for {optimalWindow.timeString}
-                </>
-              ) : (
-                <>
-                  Choose this time
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
+              {scheduled ? 'Workload Dispatched to Queue' : 'Schedule for Cleanest Window'}
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Graphical Window Comparison Cards */}
-        <div className="lg:col-span-2 space-y-4">
+        {/* Immediate vs Optimal Window Comparison (7 cols) */}
+        <div className="lg:col-span-7 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-sm space-y-5">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent-primary)]">
+                Emissions Avoidance Analysis
+              </span>
+              <h2 className="text-lg font-bold tracking-tight text-[var(--text-primary)]">
+                Immediate Execution vs Solar Window Shifting
+              </h2>
+            </div>
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              -{co2SavingsPct}% CO₂e
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Immediate Window (Coal Peak) */}
-            <div className="rounded-3xl glass-card p-5 border border-rose-500/20 shadow-lg relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-rose-500/20 pb-3 mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-                  <Flame className="h-4 w-4 text-rose-400" />
-                  Run now
-                </span>
-                <span className="text-[10px] font-mono text-slate-400 glass-pill px-2.5 py-0.5 rounded-full">
-                  Current
-                </span>
+            {/* Immediate Window */}
+            <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-rose-700 dark:text-rose-300">Immediate Run</span>
+                <span className="text-[10px] font-mono text-rose-600 dark:text-rose-400">{immediateWindow.timeString}</span>
               </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400">Window</span>
-                  <span className="font-mono text-white font-bold">{immediateWindow.timeString}</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400">Grid estimate</span>
-                  <span className="font-mono text-rose-400 font-bold">{immediateWindow.avgCI.toFixed(2)} kg/kWh</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400">Impact</span>
-                  <span className="font-mono text-rose-400 text-sm font-bold">
-                    {immediateWindow.emissionsKg.toFixed(2)} kg CO₂e
-                  </span>
-                </div>
-                <div className="pt-2 text-[11px] text-slate-400 border-t border-white/[0.05]">
-                  This is the current period.
-                </div>
+              <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">
+                {immediateWindow.emissionsKg.toFixed(2)}{' '}
+                <span className="text-xs font-normal text-[var(--text-muted)]">kg CO₂e</span>
               </div>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                Average Intensity: {immediateWindow.avgCI.toFixed(2)} kg CO₂e / kWh
+              </p>
             </div>
 
-            {/* Optimal Green Window (Solar Peak) */}
-            <div className="rounded-3xl glass-card p-5 border-2 border-emerald-500/80 bg-gradient-to-br from-emerald-500/15 via-indigo-500/5 to-transparent shadow-[0_0_30px_rgba(10,132,255,0.22)] relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3 mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <Sun className="h-4 w-4 text-emerald-400" />
-                  Recommended time
-                </span>
-                <span className="text-[10px] font-mono text-emerald-300 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-bold">
-                  Lower impact
-                </span>
+            {/* Optimal Window */}
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Cleanest Window</span>
+                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">{optimalWindow.timeString}</span>
               </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400">Window</span>
-                  <span className="font-mono text-white font-bold">{optimalWindow.timeString}</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400">Grid estimate</span>
-                  <span className="font-mono text-emerald-300 font-bold">{optimalWindow.avgCI.toFixed(2)} kg/kWh</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400">Impact</span>
-                  <span className="font-mono text-emerald-300 text-sm font-bold">
-                    {optimalWindow.emissionsKg.toFixed(2)} kg CO₂e
-                  </span>
-                </div>
-                <div className="pt-2 text-[11px] text-emerald-300 border-t border-emerald-500/20 font-medium">
-                  A lower-impact option that fits your timeframe.
-                </div>
+              <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">
+                {optimalWindow.emissionsKg.toFixed(2)}{' '}
+                <span className="text-xs font-normal text-[var(--text-muted)]">kg CO₂e</span>
               </div>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                Average Intensity: {optimalWindow.avgCI.toFixed(2)} kg CO₂e / kWh
+              </p>
             </div>
           </div>
 
-          {/* Net Carbon Avoided Banner (Apple Environmental Report Style) */}
-          <div className="rounded-3xl glass-card p-6 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_20px_rgba(10,132,255,0.3)] shrink-0">
-                <Leaf className="h-6 w-6" />
-              </div>
-              <div>
-                <span className="text-xs text-slate-300 font-medium block">Estimated reduction</span>
-                <div className="flex items-baseline gap-2 mt-0.5">
-                  <span className="text-3xl font-extrabold text-white font-mono tracking-tight">
-                    {co2AvoidedKg.toFixed(2)} kg CO₂e
-                  </span>
-                  <span className="text-emerald-400 text-lg font-bold">(-{co2SavingsPct}%)</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-left sm:text-right text-xs">
-              <span className="text-slate-400 block">By choosing</span>
-              <span className="text-emerald-400 font-bold text-sm">a better time</span>
-            </div>
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3 text-xs flex items-center justify-between">
+            <span className="text-[var(--text-muted)]">Operational Carbon Avoided:</span>
+            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+              {co2AvoidedKg.toFixed(3)} kg CO₂e ({co2SavingsPct}% net reduction)
+            </span>
           </div>
-
-          {/* 24h Heatmap Component */}
-          <ScheduleHeatmap />
         </div>
       </div>
+
+      {/* Visual Charts: 24-Hour Diurnal Curve & Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
+          <CarbonScheduleChart
+            optimalWindow={optimalWindow}
+            immediateWindow={immediateWindow}
+          />
+        </div>
+        <div className="lg:col-span-4">
+          <CarbonBreakdownChart />
+        </div>
+      </div>
+
+      {/* Heatmap Section */}
+      <ScheduleHeatmap />
     </div>
   );
 };

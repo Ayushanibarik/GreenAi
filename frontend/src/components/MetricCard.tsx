@@ -12,6 +12,7 @@ interface MetricCardProps {
   };
   icon?: React.ReactNode;
   subtext?: string;
+  className?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -21,39 +22,42 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   trend,
   icon,
   subtext,
+  className = '',
 }) => {
   return (
-    <div className="glass-card p-5 sm:p-6">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+    <div
+      className={`rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 ${className}`}
+    >
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
           {label}
         </span>
         {icon && (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--accent-primary)]">
             {icon}
           </div>
         )}
       </div>
 
       <div className="flex items-baseline gap-2">
-        <span className="text-4xl font-semibold tracking-[-0.05em] text-white tabular-nums sm:text-[2.7rem]">
+        <span className="text-3xl font-semibold tracking-tight text-[var(--text-primary)] tabular-nums sm:text-4xl">
           {value}
         </span>
         {unit && (
-          <span className="text-sm font-medium text-emerald-300">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent-primary)]">
             {unit}
           </span>
         )}
       </div>
 
       {(trend || subtext) && (
-        <div className="mt-5 flex items-center justify-between gap-2 border-t border-white/[0.07] pt-3 text-xs">
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-3 text-xs">
           {trend && (
             <div
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                 trend.isPositive
-                  ? 'bg-emerald-500/15 text-emerald-200 border border-emerald-500/25'
-                  : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                  ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  : 'border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400'
               }`}
             >
               {trend.isPositive ? (
@@ -62,11 +66,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
                 <ArrowDownRight className="h-3 w-3 stroke-[2.5]" />
               )}
               <span>{Math.abs(trend.value)}%</span>
-              {trend.label && <span className="opacity-75 ml-0.5">{trend.label}</span>}
+              {trend.label && <span className="opacity-80 ml-0.5">{trend.label}</span>}
             </div>
           )}
           {subtext && (
-            <span className="truncate text-[11px] font-medium text-slate-400">
+            <span className="truncate text-[11px] text-[var(--text-muted)]">
               {subtext}
             </span>
           )}

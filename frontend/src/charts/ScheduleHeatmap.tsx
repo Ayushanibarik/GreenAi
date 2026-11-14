@@ -47,55 +47,55 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
   const [selectedSlot, setSelectedSlot] = useState<HourSlot | null>(slots[12]);
 
   const getColor = (status: HourSlot['status'], isSelected: boolean) => {
-    if (isSelected) {
-      switch (status) {
-        case 'optimal':
-          return 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(10,132,255,0.5)] border-emerald-300 scale-105';
-        case 'moderate':
-          return 'bg-teal-500 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.5)] border-teal-300 scale-105';
-        case 'peak':
-          return 'bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.5)] border-rose-300 scale-105';
-      }
-    }
-
+    let base = '';
     switch (status) {
       case 'optimal':
-        return 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30';
+        base = isSelected
+          ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400'
+          : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20';
+        break;
       case 'moderate':
-        return 'bg-white/[0.04] border-white/[0.08] text-slate-300 hover:bg-white/[0.08]';
+        base = isSelected
+          ? 'bg-slate-700 text-white border-slate-600 ring-2 ring-slate-400'
+          : 'bg-[var(--surface-muted)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--surface-card)]';
+        break;
       case 'peak':
-        return 'bg-rose-500/15 border-rose-500/30 text-rose-300 hover:bg-rose-500/25';
+        base = isSelected
+          ? 'bg-rose-600 text-white border-rose-600 ring-2 ring-rose-400'
+          : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400 hover:bg-rose-500/20';
+        break;
     }
+    return base;
   };
 
   return (
-    <div className="rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)] relative overflow-hidden">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--accent-primary)]">
             <Calendar className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">
-              Hourly grid view
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-tight">
+              24-Hour Dispatch Heatmap (Marginal Carbon Intensity)
             </h3>
-            <p className="text-[11px] text-slate-400">Select a time to inspect its estimate.</p>
+            <p className="text-[11px] text-[var(--text-muted)]">Select an hourly window to inspect grid conditions and optimal dispatch</p>
           </div>
         </div>
 
-        {/* Legend Chips */}
+        {/* Legend Indicators */}
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-emerald-300 border border-emerald-500/30">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(90,169,255,0.8)]" />
-            <span>Lower impact</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-400 font-medium">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span>Optimal Window (Solar Peak)</span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-slate-400 border border-white/[0.06]">
-            <span className="h-2 w-2 rounded-full bg-slate-500" />
-            <span>Moderate</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-0.5 text-[var(--text-muted)] font-medium">
+            <span className="h-2 w-2 rounded-full bg-slate-400" />
+            <span>Nominal Dispatch</span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full glass-pill px-2.5 py-1 text-rose-300 border border-rose-500/30">
-            <span className="h-2 w-2 rounded-full bg-rose-400" />
-            <span>Higher impact</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 text-rose-700 dark:text-rose-400 font-medium">
+            <span className="h-2 w-2 rounded-full bg-rose-500" />
+            <span>Peak Thermal Peaker</span>
           </div>
         </div>
       </div>
@@ -108,61 +108,61 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
             <button
               key={slot.hour}
               onClick={() => setSelectedSlot(slot)}
-              className={`flex flex-col items-center justify-center rounded-xl border p-2 text-center transition-all duration-200 cursor-pointer ${getColor(
+              className={`flex flex-col items-center justify-center rounded-lg border p-1.5 text-center transition-all duration-150 cursor-pointer ${getColor(
                 slot.status,
                 isSelected
               )}`}
             >
               <span className="text-[9px] font-mono opacity-80">{slot.label.split(':')[0]}h</span>
-              <span className="text-xs font-bold font-mono mt-0.5">{slot.intensity.toFixed(2)}</span>
+              <span className="text-xs font-semibold font-mono mt-0.5">{slot.intensity.toFixed(2)}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Detail card for selected hour (Apple Inspector Card) */}
+      {/* Detail card for selected hour */}
       {selectedSlot && (
-        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl glass-pill p-4 border border-white/[0.08] text-xs">
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-3 text-xs">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] border border-white/10 shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] shrink-0">
               {selectedSlot.hour >= 6 && selectedSlot.hour <= 17 ? (
-                <Sun className="h-5 w-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                <Sun className="h-4 w-4 text-amber-500" />
               ) : (
-                <Moon className="h-5 w-5 text-indigo-400" />
+                <Moon className="h-4 w-4 text-indigo-500" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-sm">Window {selectedSlot.label}</span>
+                <span className="font-semibold text-[var(--text-primary)] text-sm">Window {selectedSlot.label}</span>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                     selectedSlot.status === 'optimal'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                       : selectedSlot.status === 'peak'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                      : 'bg-white/10 text-slate-300 border border-white/10'
+                      ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30'
+                      : 'bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-500/30'
                   }`}
                 >
-                  {selectedSlot.status === 'optimal' ? 'Lower impact' : selectedSlot.status}
+                  {selectedSlot.status === 'optimal' ? 'Optimal Dispatch' : selectedSlot.status}
                 </span>
               </div>
-              <p className="text-slate-400 text-[11px] mt-0.5">
-                Grid estimate:{' '}
-                <strong className="text-white font-mono">{selectedSlot.intensity.toFixed(2)} kg CO₂e / kWh</strong>
+              <p className="text-[var(--text-muted)] text-[11px] mt-0.5">
+                Marginal Emission Factor:{' '}
+                <strong className="text-[var(--text-primary)] font-mono">{selectedSlot.intensity.toFixed(2)} kg CO₂e / kWh</strong>
               </p>
             </div>
           </div>
 
           <div className="mt-3 sm:mt-0 flex items-center gap-4">
             <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Cleaner mix</span>
-              <span className="font-mono text-emerald-400 font-bold text-base">{selectedSlot.renewablePct}%</span>
+              <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] block">Renewable Blend</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-sm">{selectedSlot.renewablePct}%</span>
             </div>
-            <div className="h-8 w-px bg-white/[0.08]" />
+            <div className="h-6 w-px bg-[var(--border-subtle)]" />
             <div className="text-right">
-              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block">Relative impact</span>
-              <span className="font-mono text-slate-200 font-semibold text-sm">
-                {selectedSlot.status === 'optimal' ? 'Lowest' : selectedSlot.status === 'peak' ? 'Peak +40%' : 'Standard'}
+              <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] block">Delta vs Peak</span>
+              <span className="font-mono text-[var(--text-primary)] font-medium text-xs">
+                {selectedSlot.status === 'optimal' ? '-44.9% (Best)' : selectedSlot.status === 'peak' ? 'Reference Peak' : '-22.4%'}
               </span>
             </div>
           </div>

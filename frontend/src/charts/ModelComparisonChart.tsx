@@ -19,10 +19,10 @@ interface ConfigMetric {
 }
 
 const defaultData: ConfigMetric[] = [
-  { config: 'Standard', energy_wh: 4.86, latency_ms: 114, accuracy_pct: 93.2, memory_mb: 455 },
-  { config: 'Efficient', energy_wh: 5.52, latency_ms: 124, accuracy_pct: 92.4, memory_mb: 432 },
-  { config: 'Compact', energy_wh: 3.82, latency_ms: 85, accuracy_pct: 89.6, memory_mb: 387 },
-  { config: 'Balanced', energy_wh: 1.18, latency_ms: 9, accuracy_pct: 89.4, memory_mb: 380 },
+  { config: 'ResNet-18 FP32', energy_wh: 4.86, latency_ms: 114, accuracy_pct: 93.2, memory_mb: 455 },
+  { config: 'ResNet-18 INT8', energy_wh: 3.12, latency_ms: 42, accuracy_pct: 92.4, memory_mb: 320 },
+  { config: 'MobileNet-V3 FP32', energy_wh: 3.82, latency_ms: 85, accuracy_pct: 89.6, memory_mb: 387 },
+  { config: 'MobileNet-V3 ONNX', energy_wh: 1.18, latency_ms: 9, accuracy_pct: 89.4, memory_mb: 380 },
 ];
 
 interface ModelComparisonChartProps {
@@ -32,60 +32,69 @@ interface ModelComparisonChartProps {
 
 export const ModelComparisonChart: React.FC<ModelComparisonChartProps> = ({
   data = defaultData,
-  title = 'Energy and time by profile',
+  title = 'Empirical Energy vs Latency Trade-Off Analysis',
 }) => {
   return (
-    <div className="glass-card rounded-2xl p-6 border border-white/[0.08] shadow-lg shadow-black/40">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
       <div className="mb-4">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-white">{title}</h3>
-        <p className="text-xs text-slate-400 mt-0.5">
-          See the trade-off between energy use and time.
+        <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+          {title}
+        </h3>
+        <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+          Dual-axis evaluation of Joules consumed per batch versus inference latency (ms)
         </p>
       </div>
 
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-            <XAxis dataKey="config" stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }} />
-            <YAxis yAxisId="left" stroke="#0a84ff" tick={{ fill: '#8cc2ff', fontSize: 11, fontFamily: 'monospace' }} unit=" Wh" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+            <XAxis
+              dataKey="config"
+              stroke="var(--border-subtle)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'monospace' }}
+            />
+            <YAxis
+              yAxisId="left"
+              stroke="#0284c7"
+              tick={{ fill: '#0284c7', fontSize: 11, fontFamily: 'monospace' }}
+              unit=" Wh"
+            />
             <YAxis
               yAxisId="right"
               orientation="right"
-              stroke="#5e5ce6"
-              tick={{ fill: '#a8a5ff', fontSize: 11, fontFamily: 'monospace' }}
+              stroke="#7c3aed"
+              tick={{ fill: '#7c3aed', fontSize: 11, fontFamily: 'monospace' }}
               unit=" ms"
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                borderColor: 'rgba(255, 255, 255, 0.12)',
-                borderRadius: '16px',
-                boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                borderColor: 'var(--chart-tooltip-border)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                 fontSize: '12px',
-                color: '#f8fafc',
-                padding: '10px 14px',
+                color: 'var(--chart-tooltip-text)',
+                padding: '8px 12px',
               }}
             />
             <Legend
               wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-              formatter={(value) => <span className="text-slate-300 font-medium">{value}</span>}
+              formatter={(value) => <span className="text-[var(--text-secondary)] font-medium">{value}</span>}
             />
             <Bar
               yAxisId="left"
               dataKey="energy_wh"
-              name="Energy (Wh)"
-              fill="#0a84ff"
-              radius={[6, 6, 0, 0]}
+              name="Energy Dissipation (Wh)"
+              fill="#0284c7"
+              radius={[4, 4, 0, 0]}
             />
             <Bar
               yAxisId="right"
               dataKey="latency_ms"
-              name="Time (ms)"
-              fill="#5e5ce6"
-              radius={[6, 6, 0, 0]}
+              name="Inference Latency (ms)"
+              fill="#7c3aed"
+              radius={[4, 4, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>

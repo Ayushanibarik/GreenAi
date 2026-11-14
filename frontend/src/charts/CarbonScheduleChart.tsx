@@ -7,11 +7,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   ReferenceArea,
 } from 'recharts';
-import { Sun, Flame } from 'lucide-react';
+import { Sun, Flame, Clock } from 'lucide-react';
 
 export interface HourGridPoint {
   hour: number;
@@ -60,35 +59,32 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
   immediateWindow,
 }) => {
   return (
-    <div className="rounded-3xl glass-card p-6 border border-white/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.35)] relative overflow-hidden">
-      {/* Background ambient glow */}
-      <div className="absolute -top-20 -right-20 h-52 w-52 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-
-      <div className="relative mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm transition-colors duration-200 sm:p-6">
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-              Grid pattern
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              CEA Baseline v19 Diurnal Model
             </span>
           </div>
-          <h3 className="text-base font-bold text-white tracking-tight">
-            Regional grid impact through the day
+          <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
+            Regional Grid Carbon Intensity (24-Hour Profile)
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            A lower number means a lower impact.
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            Marginal grid emission factor (kg CO₂e / kWh) across Eastern Regional Grid
           </p>
         </div>
 
-        {/* Legend Pills */}
+        {/* Legend Indicators */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center gap-2 rounded-full glass-pill px-3 py-1 border border-emerald-500/30 text-emerald-300 font-medium">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(90,169,255,0.8)]" />
-            <span>Odisha</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-700 dark:text-sky-300 font-medium">
+            <span className="h-2 w-2 rounded-full bg-sky-500" />
+            <span>Odisha (Eastern Grid)</span>
           </div>
-          <div className="flex items-center gap-2 rounded-full glass-pill px-3 py-1 border border-white/[0.06] text-slate-400 font-medium">
-            <span className="h-2 w-2 rounded-full bg-teal-500" />
-          <span>National average</span>
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1 text-[var(--text-muted)] font-medium">
+            <span className="h-2 w-2 rounded-full bg-indigo-500" />
+            <span>National Average</span>
           </div>
         </div>
       </div>
@@ -97,22 +93,22 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
             <defs>
-              <linearGradient id="colorOdishaGrid" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#0A84FF" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="#0A84FF" stopOpacity={0.0} />
+              <linearGradient id="odishaCarbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#0284c7" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#0284c7" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.04)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
             <XAxis
               dataKey="timeLabel"
-              stroke="#64748b"
-              tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
+              stroke="var(--border-subtle)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'monospace' }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              stroke="#64748b"
-              tick={{ fill: '#94a3b8', fontSize: 10, fontFamily: 'monospace' }}
+              stroke="var(--border-subtle)"
+              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'monospace' }}
               domain={[0.45, 1.05]}
               unit=" kg"
               axisLine={false}
@@ -120,14 +116,13 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(15, 23, 42, 0.92)',
-                backdropFilter: 'blur(16px)',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '1rem',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                borderColor: 'var(--chart-tooltip-border)',
+                borderRadius: '8px',
                 fontSize: '12px',
-                color: '#F8FAFC',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
-                padding: '10px 14px',
+                color: 'var(--chart-tooltip-text)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                padding: '8px 12px',
               }}
               formatter={(val: any) => [`${Number(val).toFixed(2)} kg CO₂e / kWh`]}
             />
@@ -137,9 +132,9 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               <ReferenceArea
                 x1={data[optimalWindow.startHour]?.timeLabel}
                 x2={data[optimalWindow.endHour % 24]?.timeLabel}
-                fill="#0A84FF"
-                fillOpacity={0.2}
-                stroke="#0A84FF"
+                fill="#10b981"
+                fillOpacity={0.15}
+                stroke="#10b981"
                 strokeDasharray="4 4"
               />
             )}
@@ -149,9 +144,9 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
               <ReferenceArea
                 x1={data[immediateWindow.startHour]?.timeLabel}
                 x2={data[immediateWindow.endHour % 24]?.timeLabel}
-                fill="#F43F5E"
-                fillOpacity={0.12}
-                stroke="#F43F5E"
+                fill="#f43f5e"
+                fillOpacity={0.1}
+                stroke="#f43f5e"
                 strokeDasharray="4 4"
               />
             )}
@@ -159,38 +154,38 @@ export const CarbonScheduleChart: React.FC<CarbonScheduleChartProps> = ({
             <Area
               type="monotone"
               dataKey="odisha_ci"
-              stroke="#0A84FF"
-              strokeWidth={3}
+              stroke="#0284c7"
+              strokeWidth={2.5}
               fillOpacity={1}
-              fill="url(#colorOdishaGrid)"
-              name="Odisha"
+              fill="url(#odishaCarbonGrad)"
+              name="Odisha Grid"
             />
             <Line
               type="monotone"
               dataKey="national_ci"
-              stroke="#5E5CE6"
+              stroke="#6366f1"
               strokeWidth={2}
               strokeDasharray="5 5"
               dot={false}
-              name="National average"
+              name="National Baseline"
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Micro-insights pill footer */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-white/[0.06] text-xs">
-        <div className="flex items-center gap-2 rounded-xl glass-pill px-3 py-2 text-slate-400">
-          <span className="h-2 w-2 rounded-full bg-slate-500" />
-          <span>00:00 – 05:00: steady period</span>
+      {/* Scientific Insights Footer */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-[var(--border-subtle)] text-xs">
+        <div className="flex items-center gap-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-2 text-[var(--text-muted)]">
+          <Clock className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
+          <span>00:00 – 05:00: Basal Thermal Equilibrium</span>
         </div>
-        <div className="flex items-center gap-2 rounded-xl glass-pill px-3 py-2 text-emerald-300 border border-emerald-500/20 bg-emerald-500/5">
-          <Sun className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          <span>11:00 – 15:00: lower impact</span>
+        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-emerald-700 dark:text-emerald-300 font-medium">
+          <Sun className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span>11:00 – 15:00: Solar High Dispatch Window</span>
         </div>
-        <div className="flex items-center gap-2 rounded-xl glass-pill px-3 py-2 text-rose-300 border border-rose-500/20 bg-rose-500/5">
-          <Flame className="h-3.5 w-3.5 text-rose-400 shrink-0" />
-          <span>18:00 – 21:00: higher impact</span>
+        <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-rose-700 dark:text-rose-300 font-medium">
+          <Flame className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+          <span>18:00 – 21:00: Evening Thermal Peaker Load</span>
         </div>
       </div>
     </div>
