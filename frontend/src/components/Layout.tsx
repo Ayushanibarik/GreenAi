@@ -97,7 +97,7 @@ export const Layout: React.FC = () => {
         </header>
 
         {/* Main View Area */}
-        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
+        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 bg-canvas-ambient">
           <Outlet />
         </main>
       </div>

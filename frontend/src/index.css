@@ -2,46 +2,50 @@
 
 @layer base {
   :root {
-    /* ── Light Theme Semantic Tokens (Default) ────────────────────────── */
-    --surface-canvas: #f8fafc;        /* Slate 50 */
-    --surface-panel: #ffffff;         /* Pure White */
-    --surface-card: #ffffff;          /* Elevated Card White */
-    --surface-card-hover: #f1f5f9;    /* Slate 100 */
-    --surface-muted: #f1f5f9;         /* Subdued Track / Header */
+    /* ── Light Theme Semantic Tokens (Luxe Porcelain & Studio Pearl) ──── */
+    --surface-canvas: #f8f9fb;        /* Warm Porcelain Studio Canvas */
+    --surface-panel: #ffffff;         /* Pure Crystal White */
+    --surface-card: #ffffff;          /* Elevated Studio Card */
+    --surface-card-hover: #f3f5f8;    /* Smooth Hover State */
+    --surface-muted: #f0f2f6;         /* Subdued Inner Track / Header */
     --surface-pill: rgba(0, 0, 0, 0.04);
 
-    --border-subtle: #e2e8f0;         /* Slate 200 */
-    --border-strong: #cbd5e1;         /* Slate 300 */
-    --border-focus: #0284c7;          /* Sky 600 */
+    --border-subtle: #e5e8ec;         /* Ultra-fine Hairline Border */
+    --border-strong: #d1d6de;         /* Strong Accent Border */
+    --border-focus: #059669;          /* Emerald Accent */
 
-    --text-primary: #0f172a;          /* Slate 900 */
-    --text-secondary: #475569;        /* Slate 600 */
-    --text-muted: #94a3b8;            /* Slate 400 */
+    --text-primary: #090d16;          /* Deep Ink Black */
+    --text-secondary: #4b5565;        /* Refined Slate */
+    --text-muted: #8c97a8;            /* Neutral Muted */
     --text-inverse: #f8fafc;
 
-    --brand-primary: #059669;         /* Emerald 600 */
-    --brand-primary-hover: #047857;   /* Emerald 700 */
-    --brand-primary-subtle: #ecfdf5;  /* Emerald 50 */
-    --brand-primary-border: #a7f3d0;  /* Emerald 200 */
+    --brand-primary: #059669;         /* High-Efficiency Emerald */
+    --brand-primary-hover: #047857;   /* Deep Emerald */
+    --brand-primary-subtle: #ecfdf5;  /* Subtle Emerald Tint */
+    --brand-primary-border: #a7f3d0;  /* Emerald Border */
 
-    --brand-blue: #0284c7;            /* Sky 600 */
-    --brand-blue-subtle: #f0f9ff;     /* Sky 50 */
-    --brand-blue-border: #bae6fd;     /* Sky 200 */
+    --brand-blue: #0284c7;            /* Azure Sky */
+    --brand-blue-subtle: #f0f9ff;
+    --brand-blue-border: #bae6fd;
 
-    --brand-amber: #d97706;           /* Amber 600 */
-    --brand-amber-subtle: #fffbeb;    /* Amber 50 */
-    --brand-amber-border: #fde68a;    /* Amber 200 */
+    --brand-amber: #d97706;           /* Amber */
+    --brand-amber-subtle: #fffbeb;
+    --brand-amber-border: #fde68a;
 
-    --brand-rose: #dc2626;            /* Rose 600 */
-    --brand-rose-subtle: #fef2f2;     /* Rose 50 */
-    --brand-rose-border: #fecaca;     /* Rose 200 */
+    --brand-rose: #dc2626;            /* Rose Alert */
+    --brand-rose-subtle: #fef2f2;
+    --brand-rose-border: #fecaca;
 
-    --chart-grid: #e2e8f0;
-    --chart-tooltip-bg: rgba(255, 255, 255, 0.96);
-    --chart-tooltip-border: #cbd5e1;
-    --chart-tooltip-text: #0f172a;
+    --ambient-glow-1: rgba(5, 150, 105, 0.035);
+    --ambient-glow-2: rgba(2, 132, 199, 0.025);
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 4px 14px -2px rgba(0, 0, 0, 0.03);
 
-    --slider-track: #cbd5e1;
+    --chart-grid: #e5e8ec;
+    --chart-tooltip-bg: rgba(255, 255, 255, 0.98);
+    --chart-tooltip-border: #e5e8ec;
+    --chart-tooltip-text: #090d16;
+
+    --slider-track: #d1d6de;
     --slider-thumb-bg: #ffffff;
     --slider-thumb-border: #059669;
 
@@ -49,46 +53,50 @@
   }
 
   [data-theme="dark"] {
-    /* ── Dark Theme Semantic Tokens (Observability Obsidian) ──────────── */
-    --surface-canvas: #0a0d14;        /* Deep Obsidian */
-    --surface-panel: #101522;         /* Deep Navy Slate */
-    --surface-card: #151b2b;          /* Elevated Card Slate */
-    --surface-card-hover: #1c2438;    /* Hover State */
-    --surface-muted: #131927;         /* Subdued Track / Header */
-    --surface-pill: rgba(255, 255, 255, 0.06);
+    /* ── Dark Theme Semantic Tokens (Deep Obsidian & Graphite Studio) ─── */
+    --surface-canvas: #090a0f;        /* Deep Obsidian Graphite */
+    --surface-panel: #0d0f15;         /* Deep Titanium Panel */
+    --surface-card: #131620;          /* Elevated Obsidian Card */
+    --surface-card-hover: #181c28;    /* Luminous Hover State */
+    --surface-muted: #0e1119;         /* Subdued Inner Track / Header */
+    --surface-pill: rgba(255, 255, 255, 0.05);
 
-    --border-subtle: #1e293b;         /* Slate 800 */
-    --border-strong: #334155;         /* Slate 700 */
-    --border-focus: #38bdf8;          /* Sky 400 */
+    --border-subtle: rgba(255, 255, 255, 0.07);  /* Crisp Hairline Border */
+    --border-strong: rgba(255, 255, 255, 0.14);  /* Focused Hairline Border */
+    --border-focus: #10b981;          /* Emerald Glow */
 
-    --text-primary: #f8fafc;          /* Slate 50 */
-    --text-secondary: #94a3b8;        /* Slate 400 */
-    --text-muted: #64748b;            /* Slate 500 */
-    --text-inverse: #0f172a;
+    --text-primary: #ffffff;          /* Pure Crisp White */
+    --text-secondary: #9ca3af;        /* Neutral Slate */
+    --text-muted: #6b7280;            /* Soft Charcoal */
+    --text-inverse: #090d16;
 
-    --brand-primary: #10b981;         /* Emerald 500 */
-    --brand-primary-hover: #34d399;   /* Emerald 400 */
+    --brand-primary: #10b981;         /* Radiant Emerald */
+    --brand-primary-hover: #34d399;   /* Bright Mint */
     --brand-primary-subtle: rgba(16, 185, 129, 0.12);
     --brand-primary-border: rgba(16, 185, 129, 0.28);
 
-    --brand-blue: #38bdf8;            /* Sky 400 */
+    --brand-blue: #38bdf8;            /* Electric Sky */
     --brand-blue-subtle: rgba(56, 189, 248, 0.12);
     --brand-blue-border: rgba(56, 189, 248, 0.28);
 
-    --brand-amber: #fbbf24;           /* Amber 400 */
+    --brand-amber: #fbbf24;           /* Warm Amber */
     --brand-amber-subtle: rgba(251, 191, 36, 0.12);
     --brand-amber-border: rgba(251, 191, 36, 0.28);
 
-    --brand-rose: #f43f5e;            /* Rose 500 */
+    --brand-rose: #f43f5e;            /* Crimson Rose */
     --brand-rose-subtle: rgba(244, 63, 94, 0.12);
     --brand-rose-border: rgba(244, 63, 94, 0.28);
 
-    --chart-grid: #1e293b;
-    --chart-tooltip-bg: rgba(16, 21, 34, 0.95);
-    --chart-tooltip-border: #334155;
-    --chart-tooltip-text: #f8fafc;
+    --ambient-glow-1: rgba(16, 185, 129, 0.045);
+    --ambient-glow-2: rgba(56, 189, 248, 0.035);
+    --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.02);
 
-    --slider-track: #1e293b;
+    --chart-grid: rgba(255, 255, 255, 0.05);
+    --chart-tooltip-bg: rgba(19, 22, 32, 0.96);
+    --chart-tooltip-border: rgba(255, 255, 255, 0.12);
+    --chart-tooltip-text: #ffffff;
+
+    --slider-track: #1e2433;
     --slider-thumb-bg: #ffffff;
     --slider-thumb-border: #10b981;
 
@@ -111,7 +119,17 @@ body {
   margin: 0;
   background-color: var(--surface-canvas);
   color: var(--text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Luxury Ambient Mesh Backdrop ──────────────────────────────────────── */
+
+.bg-canvas-ambient {
+  background-color: var(--surface-canvas);
+  background-image: 
+    radial-gradient(ellipse 70% 40% at 50% -10%, var(--ambient-glow-1) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 85% 100%, var(--ambient-glow-2) 0%, transparent 60%);
+  background-attachment: fixed;
 }
 
 /* ── Scientific Computing & Observability Surface Classes ──────────────── */
@@ -127,12 +145,17 @@ body {
   color: var(--text-primary);
 }
 
+.sci-card,
+[class*="bg-[var(--surface-card)]"] {
+  box-shadow: var(--card-shadow);
+}
+
 .sci-card {
   background-color: var(--surface-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .sci-card:hover {
@@ -160,61 +183,23 @@ body {
 .sci-input:focus {
   border-color: var(--border-focus);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
-/* Legacy Alias Support for Smooth Migration */
-.glass-panel {
-  background-color: var(--surface-panel);
-  border: 1px solid var(--border-subtle);
-}
-
-.glass-card {
-  background-color: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.glass-card:hover {
-  background-color: var(--surface-card-hover);
-  border-color: var(--border-strong);
-}
-
-.glass-pill {
-  background-color: var(--surface-pill);
-  border: 1px solid var(--border-subtle);
-  border-radius: 9999px;
-}
-
-/* ── Typography Accents ────────────────────────────────────────────────── */
-
-.text-gradient-emerald {
-  background: linear-gradient(135deg, #059669 0%, #10b981 50%, #0284c7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-[data-theme="dark"] .text-gradient-emerald {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* ── Research-Grade Range Sliders ──────────────────────────────────────── */
+/* ── Range Sliders ─────────────────────────────────────────────────────── */
 
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
   cursor: pointer;
-  height: 6px;
+  height: 5px;
   border-radius: 9999px;
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
   background: var(--slider-track);
-  height: 6px;
+  height: 5px;
   border-radius: 9999px;
   border: none;
 }
@@ -222,13 +207,13 @@ input[type="range"]::-webkit-slider-runnable-track {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  height: 18px;
-  width: 18px;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
   background: var(--slider-thumb-bg);
   border: 2px solid var(--slider-thumb-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  margin-top: -6px;
+  margin-top: -5.5px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
