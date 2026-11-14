@@ -72,3 +72,20 @@ export interface TelemetryPayload {
   timestamp: string;
 }
 
+export interface BackendBenchmarkItem {
+  id?: string;
+  config_name?: string;
+  model_name?: string;
+  precision?: 'FP32' | 'FP16' | 'INT8' | 'ONNX';
+  energy_wh?: number;
+  predicted_energy_wh?: number;
+  latency_ms?: number;
+  predicted_latency_ms?: number;
+  accuracy?: number;
+  memory_mb?: number;
+  predicted_peak_memory_mb?: number;
+  throughput_rps?: number;
+  co2e_grams?: number;
+}
+
+

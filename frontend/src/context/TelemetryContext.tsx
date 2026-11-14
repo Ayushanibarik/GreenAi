@@ -6,8 +6,10 @@ export interface TelemetryContextType {
   data: TelemetryPayload | null;
   isConnected: boolean;
   isSimulating: boolean;
+  isPaused: boolean;
   connectionStatus: 'live' | 'simulation' | 'offline';
   toggleSimulation: () => void;
+  togglePause: () => void;
   hardwareHistory: HardwareReading[];
   hardwareStatus: {
     device: string;
@@ -34,8 +36,10 @@ const TelemetryContext = createContext<TelemetryContextType>({
   data: null,
   isConnected: false,
   isSimulating: true,
+  isPaused: false,
   connectionStatus: 'simulation',
   toggleSimulation: () => {},
+  togglePause: () => {},
   hardwareHistory: initialHardwareHistory,
   hardwareStatus: {
     device: 'ESP32-WROOM-32D + INA219',
@@ -52,6 +56,7 @@ export const TelemetryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Simulation mode defaults to true for immediate out-of-the-box telemetry demonstration
   const [isSimulating, setIsSimulating] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const [simTelemetry, setSimTelemetry] = useState<TelemetryPayload>({
     cpu_percent: 46.2,
     gpu_percent: 78.4,
@@ -71,8 +76,13 @@ export const TelemetryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setIsSimulating((prev) => !prev);
   }, []);
 
+  const togglePause = useCallback(() => {
+    setIsPaused((prev) => !prev);
+  }, []);
+
   // Simulator interval loop (1Hz tick)
   useEffect(() => {
+    if (isPaused) return;
     if (!isSimulating && isConnected) return;
 
     const interval = setInterval(() => {
@@ -113,7 +123,7 @@ export const TelemetryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isSimulating, isConnected]);
+  }, [isSimulating, isConnected, isPaused]);
 
   const activeTelemetry: TelemetryPayload =
     !isSimulating && isConnected && wsTelemetry
@@ -142,8 +152,10 @@ export const TelemetryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         data: activeTelemetry,
         isConnected: isConnected || isSimulating,
         isSimulating,
+        isPaused,
         connectionStatus,
         toggleSimulation,
+        togglePause,
         hardwareHistory,
         hardwareStatus,
       }}

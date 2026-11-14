@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
-import { PlusCircle, Search, Filter, Layers, RefreshCw } from 'lucide-react';
+import { PlusCircle, Search, Filter, Layers, RefreshCw, Download, Inbox, RotateCcw } from 'lucide-react';
 import api from '../services/api';
 import type { Workload } from '../types';
 
@@ -153,6 +153,35 @@ export const WorkloadPage: React.FC = () => {
   const totalEnergy = workloads.reduce((acc, curr) => acc + (curr.energy_wh || 0), 0);
   const totalCarbon = workloads.reduce((acc, curr) => acc + (curr.carbon_g || 0), 0);
 
+  const exportCSV = () => {
+    const headers = ['ID', 'Name', 'Model Type', 'Status', 'Energy (Wh)', 'CO2e (g)', 'Latency (ms)', 'Accuracy (%)', 'Created At'];
+    const rows = filteredWorkloads.map((w) => [
+      w.id,
+      `"${w.name.replace(/"/g, '""')}"`,
+      `"${w.model_type}"`,
+      w.status,
+      w.energy_wh ?? 0,
+      w.carbon_g ?? 0,
+      w.latency_ms ?? 0,
+      w.accuracy ?? 0,
+      w.created_at,
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `greenai-workloads-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const resetFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+  };
+
   return (
     <div className="space-y-5 pb-8">
       {/* Header and Actions */}
@@ -167,6 +196,14 @@ export const WorkloadPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCSV}
+            leftIcon={<Download className="h-3.5 w-3.5" />}
+          >
+            Export CSV
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -259,47 +296,72 @@ export const WorkloadPage: React.FC = () => {
       {/* Workload Table */}
       <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="sci-table">
             <thead>
-              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">ID</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Name</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Time</th>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Energy</th>
+                <th>CO₂e</th>
+                <th>Latency</th>
+                <th>Accuracy</th>
+                <th className="text-right">Time</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
-              {filteredWorkloads.map((wl) => (
-                <tr key={wl.id} className="hover:bg-[var(--surface-muted)] transition-colors">
-                  <td className="py-3 px-3 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
-                  <td className="py-3 px-3">
-                    <div className="font-medium text-[var(--text-primary)]">{wl.name}</div>
-                    <span className="text-[10px] text-[var(--text-muted)] font-mono">{wl.model_type}</span>
-                  </td>
-                  <td className="py-3 px-3">
-                    <StatusBadge status={wl.status} />
-                  </td>
-                  <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
-                    {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
-                    {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
-                  </td>
-                  <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
-                    {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
-                  </td>
-                  <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
-                    {wl.accuracy ? `${wl.accuracy.toFixed(1)}%` : '—'}
-                  </td>
-                  <td className="py-3 px-3 text-right text-[var(--text-muted)] text-[11px] font-mono">
-                    {new Date(wl.created_at).toLocaleDateString()} {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <tbody>
+              {filteredWorkloads.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--text-muted)]">
+                        <Inbox className="h-5 w-5" />
+                      </div>
+                      <span className="text-xs font-medium text-[var(--text-primary)]">
+                        No workloads match current filters
+                      </span>
+                      <p className="text-[11px] text-[var(--text-muted)] max-w-xs">
+                        Try modifying your search query or reset the status filters to view historical benchmark runs.
+                      </p>
+                      <button
+                        onClick={resetFilters}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-card)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Reset Filters
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredWorkloads.map((wl) => (
+                  <tr key={wl.id} className="hover:bg-[var(--surface-muted)] transition-colors">
+                    <td className="py-3 px-3 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
+                    <td className="py-3 px-3">
+                      <div className="font-medium text-[var(--text-primary)]">{wl.name}</div>
+                      <span className="text-[10px] text-[var(--text-muted)] font-mono">{wl.model_type}</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <StatusBadge status={wl.status} />
+                    </td>
+                    <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
+                      {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
+                    </td>
+                    <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
+                      {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
+                    </td>
+                    <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
+                      {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
+                    </td>
+                    <td className="py-3 px-3 font-mono font-medium text-[var(--text-primary)]">
+                      {wl.accuracy ? `${wl.accuracy.toFixed(1)}%` : '—'}
+                    </td>
+                    <td className="py-3 px-3 text-right text-[var(--text-muted)] text-[11px] font-mono">
+                      {new Date(wl.created_at).toLocaleDateString()} {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

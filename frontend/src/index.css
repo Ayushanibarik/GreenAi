@@ -247,6 +247,51 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   background: var(--text-muted);
 }
 
+/* ── Universal Scientific Table Classes ────────────────────────────────── */
+
+.sci-table {
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.sci-table thead tr {
+  background-color: var(--surface-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.sci-table th {
+  padding: 10px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sci-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sci-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.sci-table tbody tr:hover {
+  background-color: var(--surface-card-hover);
+}
+
+/* ── Global Accessibility Focus Indicator ──────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--border-focus) !important;
+  outline-offset: 2px !important;
+}
+
 /* ── Accessibility: Reduced Motion ─────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

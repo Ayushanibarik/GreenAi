@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ModelComparisonChart from '../charts/ModelComparisonChart';
 import { Play, Layers } from 'lucide-react';
 import api from '../services/api';
-import type { BenchmarkResult } from '../types';
+import type { BenchmarkResult, BackendBenchmarkItem } from '../types';
 
 const defaultBenchmarks: BenchmarkResult[] = [
   {
@@ -73,7 +73,7 @@ export const BenchmarkPage: React.FC = () => {
       try {
         const res = await api.getBenchmarksSummary();
         if (mounted && res.data && res.data.benchmarks && res.data.benchmarks.length > 0) {
-          const mapped: BenchmarkResult[] = res.data.benchmarks.map((b: any, idx: number) => ({
+          const mapped: BenchmarkResult[] = res.data.benchmarks.map((b: BackendBenchmarkItem, idx: number) => ({
             id: `BM-SYN-${idx + 1}`,
             config_name: b.config_name || b.model_name || `Model-${idx}`,
             precision: b.precision || 'FP32',
@@ -216,21 +216,21 @@ export const BenchmarkPage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="sci-table">
             <thead>
-              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">ID</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Config</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Precision</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Throughput</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Memory</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Accuracy</th>
+              <tr>
+                <th>ID</th>
+                <th>Config</th>
+                <th>Precision</th>
+                <th>Latency</th>
+                <th>Throughput</th>
+                <th>Energy</th>
+                <th>Memory</th>
+                <th>CO₂e</th>
+                <th className="text-right">Accuracy</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
+            <tbody>
               {benchmarks.map((b) => (
                 <tr key={b.id} className="hover:bg-[var(--surface-muted)] transition-colors">
                   <td className="py-2.5 px-3 font-mono font-medium text-[var(--accent-primary)]">{b.id}</td>

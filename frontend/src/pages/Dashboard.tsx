@@ -209,39 +209,39 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="sci-table">
             <thead>
-              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">ID</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Model</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Emissions</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Time</th>
+              <tr>
+                <th>ID</th>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Energy</th>
+                <th>Emissions</th>
+                <th>Latency</th>
+                <th className="text-right">Time</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
+            <tbody>
               {workloads.slice(0, 5).map((wl) => (
-                <tr key={wl.id} className="hover:bg-[var(--surface-muted)] transition-colors">
-                  <td className="py-2.5 px-3 font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
-                  <td className="py-2.5 px-3">
+                <tr key={wl.id}>
+                  <td className="font-mono font-medium text-[var(--accent-primary)]">{wl.id}</td>
+                  <td>
                     <div className="font-medium text-[var(--text-primary)]">{wl.name}</div>
                     <span className="text-[10px] text-[var(--text-muted)] font-mono">{wl.model_type}</span>
                   </td>
-                  <td className="py-2.5 px-3">
+                  <td>
                     <StatusBadge status={wl.status} />
                   </td>
-                  <td className="py-2.5 px-3 font-mono font-medium text-[var(--text-primary)]">
+                  <td className="font-mono font-medium text-[var(--text-primary)]">
                     {wl.energy_wh ? `${wl.energy_wh.toFixed(1)} Wh` : '—'}
                   </td>
-                  <td className="py-2.5 px-3 font-mono text-[var(--text-muted)]">
+                  <td className="font-mono text-[var(--text-muted)]">
                     {wl.carbon_g ? `${wl.carbon_g.toFixed(1)} g` : '—'}
                   </td>
-                  <td className="py-2.5 px-3 font-mono text-[var(--text-muted)]">
+                  <td className="font-mono text-[var(--text-muted)]">
                     {wl.latency_ms ? `${wl.latency_ms} ms` : '—'}
                   </td>
-                  <td className="py-2.5 px-3 text-right text-[var(--text-muted)] text-[11px] font-mono">
+                  <td className="text-right text-[var(--text-muted)] text-[11px] font-mono">
                     {new Date(wl.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>

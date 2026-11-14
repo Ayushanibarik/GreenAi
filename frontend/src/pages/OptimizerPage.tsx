@@ -8,6 +8,8 @@ import {
   Award,
   Layers,
   Activity,
+  Download,
+  FileCode,
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -124,10 +126,12 @@ export const OptimizerPage: React.FC = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [applied, setApplied] = useState(false);
   const [apiSynced, setApiSynced] = useState(false);
+  const [activePreset, setActivePreset] = useState<'balanced' | 'edge' | 'accurate' | null>('balanced');
 
   const baseline = ALL_CANDIDATES[0];
 
   const applyPreset = (preset: 'balanced' | 'edge' | 'accurate') => {
+    setActivePreset(preset);
     if (preset === 'edge') {
       setMinAccuracy(88.5);
       setMaxLatency(30);
@@ -154,6 +158,42 @@ export const OptimizerPage: React.FC = () => {
       setDeltaMemory(0.1);
     }
     setApplied(false);
+  };
+
+  const exportConfigJSON = () => {
+    const configData = {
+      recommended_model: recommended.name,
+      architecture: recommended.architecture,
+      precision: recommended.precision,
+      sla_constraints: {
+        min_accuracy: minAccuracy,
+        max_latency_ms: maxLatency,
+        max_memory_mb: maxMemory,
+      },
+      pareto_weights: {
+        alpha_energy: alphaEnergy,
+        beta_latency: betaLatency,
+        gamma_accuracy: gammaAccuracy,
+        delta_memory: deltaMemory,
+      },
+      projected_metrics: {
+        accuracy: recommended.accuracy,
+        latency_ms: recommended.latency_ms,
+        energy_wh: recommended.energy_wh,
+        memory_mb: recommended.memory_mb,
+        energy_reduction_pct: energySavedPct,
+        co2_avoided_g: co2AvoidedG,
+      },
+      exported_at: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(configData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `pareto-config-${recommended.id}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const evaluatedCandidates = useMemo(() => {
@@ -246,27 +286,20 @@ export const OptimizerPage: React.FC = () => {
 
         {/* Preset Selector */}
         <div className="flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-1 text-xs">
-          <button
-            type="button"
-            onClick={() => applyPreset('edge')}
-            className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-          >
-            Edge
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('balanced')}
-            className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-          >
-            Balanced
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('accurate')}
-            className="rounded-md px-2.5 py-1 font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-          >
-            Accurate
-          </button>
+          {(['edge', 'balanced', 'accurate'] as const).map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => applyPreset(preset)}
+              className={`rounded-md px-2.5 py-1 font-medium capitalize transition-colors cursor-pointer ${
+                activePreset === preset
+                  ? 'bg-[var(--accent-primary)] text-white shadow-xs'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {preset}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -404,6 +437,15 @@ export const OptimizerPage: React.FC = () => {
 
         {/* Recommended Candidate & Empirical Delta (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
+          {feasibleCandidates.length === 0 && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+              <span>
+                Constraint Alert: Zero candidate models satisfy all SLA criteria (Min Acc {minAccuracy.toFixed(1)}%, Max Latency {maxLatency}ms, Max Memory {maxMemory}MB). Displaying baseline configuration.
+              </span>
+            </div>
+          )}
+
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-sm">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3">
               <div>
@@ -458,10 +500,20 @@ export const OptimizerPage: React.FC = () => {
             </div>
 
             {/* Action Bar */}
-            <div className="mt-4 flex items-center justify-between border-t border-[var(--border-subtle)] pt-3">
-              <span className="text-xs font-mono text-[var(--text-muted)]">
-                {feasibleCandidates.length}/{ALL_CANDIDATES.length} Feasible
-              </span>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-3">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono text-[var(--text-muted)]">
+                  {feasibleCandidates.length}/{ALL_CANDIDATES.length} Feasible
+                </span>
+                <button
+                  type="button"
+                  onClick={exportConfigJSON}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-card)] transition-colors cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                  Export JSON
+                </button>
+              </div>
 
               <button
                 type="button"
@@ -487,21 +539,21 @@ export const OptimizerPage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="sci-table">
             <thead>
-              <tr className="border-b border-[var(--border-subtle)] bg-[var(--surface-muted)] text-[var(--text-muted)]">
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Model</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Precision</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Accuracy</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Latency</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Energy</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Memory</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">CO₂e</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px]">Status</th>
-                <th className="py-2 px-3 font-semibold uppercase tracking-wider text-[10px] text-right">Score</th>
+              <tr>
+                <th>Model</th>
+                <th>Precision</th>
+                <th>Accuracy</th>
+                <th>Latency</th>
+                <th>Energy</th>
+                <th>Memory</th>
+                <th>CO₂e</th>
+                <th>Status</th>
+                <th className="text-right">Score</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
+            <tbody>
               {evaluatedCandidates.map((c) => {
                 const isSelected = c.id === recommended.id;
                 return (

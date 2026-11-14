@@ -11,7 +11,7 @@ export type { TelemetryContextType } from '../context/TelemetryContext';
 export const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { data: telemetry, isConnected, isSimulating, toggleSimulation } = useTelemetry();
+  const { data: telemetry, isConnected, isSimulating, isPaused, connectionStatus, togglePause } = useTelemetry();
 
   const getPageTitle = (pathname: string) => {
     switch (pathname) {
@@ -62,25 +62,35 @@ export const Layout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            {/* Telemetry Stream Pill */}
+            {/* Telemetry Provenance & Stream Pill */}
             <button
-              onClick={toggleSimulation}
+              onClick={togglePause}
               className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border transition-all cursor-pointer ${
-                isSimulating
-                  ? 'bg-[var(--brand-primary-subtle)] border-[var(--brand-primary-border)] text-[var(--brand-primary)]'
-                  : 'bg-[var(--surface-muted)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                isPaused
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                  : connectionStatus === 'live'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-sky-500/10 border-sky-500/30 text-sky-600 dark:text-sky-400'
               }`}
-              title={isSimulating ? '10Hz Stream Active (Click to pause)' : 'Stream Paused (Click to resume)'}
+              title={
+                isPaused
+                  ? 'Telemetry Paused (Click to resume stream)'
+                  : connectionStatus === 'live'
+                  ? 'Physical Telemetry: WebSocket Connected (Click to pause)'
+                  : 'Synthetic Benchmark Feed: Running Staging Simulation (Click to pause)'
+              }
             >
-              {isSimulating ? (
+              {isPaused ? (
                 <>
-                  <Pause className="h-3 w-3 text-[var(--brand-primary)]" />
-                  <span>10Hz</span>
+                  <Play className="h-3 w-3" />
+                  <span className="font-mono text-[11px]">PAUSED</span>
                 </>
               ) : (
                 <>
-                  <Play className="h-3 w-3 text-[var(--text-muted)]" />
-                  <span>Paused</span>
+                  <span className={`h-1.5 w-1.5 rounded-full ${connectionStatus === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-sky-500 animate-pulse'}`} />
+                  <span className="font-mono text-[11px]">
+                    {connectionStatus === 'live' ? 'MEASURED' : 'SIMULATED'}
+                  </span>
                 </>
               )}
             </button>

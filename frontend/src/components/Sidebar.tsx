@@ -30,7 +30,7 @@ const navItems = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
-  const { hardwareStatus } = useTelemetry();
+  const { hardwareStatus, connectionStatus } = useTelemetry();
 
   return (
     <>
@@ -103,13 +103,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
           })}
         </nav>
 
-        {/* Minimal Hardware Sensor Widget */}
+        {/* Hardware Telemetry Provenance Widget */}
         <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] p-2.5 mt-auto">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="font-mono text-[var(--text-primary)] font-medium">ESP32 + INA219</span>
-            <span className="flex items-center gap-1 font-mono text-[var(--brand-primary)] text-[10px]">
-              <Wifi className="h-3 w-3" />
-              10Hz
+            <span className="font-mono text-[var(--text-primary)] font-medium">ESP32 · INA219</span>
+            <span className={`flex items-center gap-1 font-mono text-[10px] font-semibold ${
+              connectionStatus === 'live'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-sky-600 dark:text-sky-400'
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${connectionStatus === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-sky-500'}`} />
+              {connectionStatus === 'live' ? 'Live Bus' : 'Simulation'}
             </span>
           </div>
         </div>

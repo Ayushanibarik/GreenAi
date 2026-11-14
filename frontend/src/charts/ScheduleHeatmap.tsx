@@ -105,6 +105,8 @@ export const ScheduleHeatmap: React.FC<ScheduleHeatmapProps> = ({
             <button
               key={slot.hour}
               onClick={() => setSelectedSlot(slot)}
+              title={`${slot.label} — Carbon Intensity: ${(slot.intensity * 1000).toFixed(0)} gCO₂e/kWh (${slot.renewablePct}% clean energy)`}
+              aria-label={`Time ${slot.label}, carbon intensity ${(slot.intensity * 1000).toFixed(0)} grams per kilowatt-hour, status ${slot.status}`}
               className={`flex flex-col items-center justify-center rounded-lg border p-1 text-center transition-all duration-150 cursor-pointer ${getColor(
                 slot.status,
                 isSelected
